@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cake Lab | Tuyển dụng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#F37021;
+    --orange-dark:#D95E14;
+    --orange-tint:#FCE3CC;
+    --blue:#032C7D;
+    --blue-tint:#E4E9F5;
+    --cream:#FCF6ED;
+    --ink:#1C1710;
+    --ink-soft:#6B655C;
+    --white:#FFFFFF;
+    --line:rgba(3,44,125,0.12);
+    --shadow: 0 18px 40px -22px rgba(3,44,125,0.35);
+    --radius-lg:28px;
+    --radius-md:18px;
+    --radius-sm:12px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Be Vietnam Pro',sans-serif;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  .page{
+    max-width:1040px;
+    margin:0 auto;
+    padding:32px 24px 80px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:56px;
+  }
+  .logo-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:0.16em;
+    padding:12px 22px;
+    border-radius:999px;
+    text-transform:uppercase;
+  }
+  .logo-pill .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--white);
+    opacity:0.85;
+  }
+  .topbar-tag{
+    font-size:13px;
+    font-weight:600;
+    color:var(--blue);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    padding:8px 16px;
+    border-radius:999px;
+    background:var(--white);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{margin-bottom:48px;}
+  .eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.22em;
+    color:var(--orange-dark);
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(30px,5vw,46px);
+    line-height:1.15;
+    font-weight:800;
+    margin:0 0 20px;
+    color:var(--blue);
+  }
+  .hero h1 span{color:var(--orange);}
+  .hero p.lead{
+    font-size:17px;
+    line-height:1.7;
+    color:var(--ink-soft);
+    max-width:640px;
+    margin:0 0 32px;
+  }
+
+  .social-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .social-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 18px 11px 14px;
+    border-radius:999px;
+    border:1.5px solid var(--blue);
+    background:var(--white);
+    color:var(--blue);
+    font-weight:600;
+    font-size:14px;
+    text-decoration:none;
+    transition:all .18s ease;
+  }
+  .social-pill:hover{
+    background:var(--blue);
+    color:var(--white);
+    transform:translateY(-1px);
+  }
+  .social-pill svg{width:18px;height:18px;flex:none;}
+
+  /* ---------- CONTACT CARD ---------- */
+  .contact-card{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    padding:32px 34px;
+    margin-bottom:64px;
+    position:relative;
+    overflow:hidden;
+  }
+  .contact-card::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:6px;
+    background:var(--orange);
+  }
+  .contact-card h3{
+    margin:0 0 4px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--orange-dark);
+  }
+  .contact-card .team-name{
+    font-size:22px;
+    font-weight:700;
+    color:var(--blue);
+    margin:0 0 20px;
+  }
+  .contact-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+  }
+  .contact-item{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .contact-item svg{
+    width:20px;height:20px;flex:none;margin-top:2px;
+    color:var(--orange);
+  }
+  .contact-item .label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:2px;
+  }
+  .contact-item .value{
+    font-size:14.5px;
+    font-weight:500;
+    line-height:1.5;
+    word-break:break-word;
+  }
+
+  /* ---------- POSITIONS ---------- */
+  .positions-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .positions-head h2{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:0.02em;
+    color:var(--blue);
+    margin:0;
+    position:relative;
+    padding-bottom:12px;
+  }
+  .positions-head h2::after{
+    content:"";
+    position:absolute;
+    left:0;bottom:0;
+    width:56px;height:4px;
+    border-radius:4px;
+    background:var(--orange);
+  }
+  .positions-sub{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:20px;
+  }
+
+  .job-card{
+    background:var(--white);
+    border-radius:var(--radius-md);
+    border:1px solid rgba(3,44,125,0.08);
+    overflow:hidden;
+    box-shadow:0 14px 28px -20px rgba(3,44,125,0.45);
+    display:flex;
+    flex-direction:column;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .job-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 20px 34px -16px rgba(3,44,125,0.5);
+  }
+  .job-swatch{
+    height:56px;
+    background:linear-gradient(155deg,#F58038 0%,var(--orange) 55%,#C85A12 100%);
+    position:relative;
+  }
+  .job-swatch::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:1px;
+    background:rgba(255,255,255,0.14);
+  }
+
+  .job-body{
+    padding:16px 18px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    flex:1;
+  }
+  .job-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.3;
+  }
+  .job-dept{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:-6px;
+  }
+  .job-note{
+    font-size:12px;
+    font-weight:500;
+    color:var(--orange-dark);
+    background:var(--orange-tint);
+    display:inline-flex;
+    align-items:center;
+    width:fit-content;
+    padding:3px 9px;
+    border-radius:7px;
+  }
+  .job-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:auto;
+  }
+  .qty-tag{
+    font-size:12px;
+    font-weight:700;
+    color:var(--blue);
+    background:var(--blue-tint);
+    padding:5px 10px;
+    border-radius:8px;
+  }
+  .job-btn{
+    border:none;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:700;
+    font-size:13.5px;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .18s ease;
+  }
+  .job-btn:hover{background:var(--orange-dark);}
+
+  .state-msg{
+    grid-column:1/-1;
+    text-align:center;
+    padding:48px 20px;
+    color:var(--ink-soft);
+    font-size:14px;
+    background:var(--white);
+    border-radius:var(--radius-md);
+    border:1px dashed var(--line);
+  }
+
+  .dev-banner{
+    font-size:12.5px;
+    color:var(--blue);
+    background:var(--blue-tint);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:20px;
+    display:none;
+  }
+  .dev-banner.show{display:block;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(20,15,8,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-card{
+    background:var(--white);
+    width:100%;
+    max-width:760px;
+    max-height:86vh;
+    border-radius:var(--radius-md);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    transform:translateY(12px);
+    transition:transform .2s ease;
+  }
+  .modal-overlay.open .modal-card{transform:translateY(0);}
+  .modal-header{
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    background:var(--blue);
+    color:var(--white);
+  }
+  .modal-header h4{
+    margin:0;
+    font-size:16px;
+    font-weight:700;
+  }
+  .modal-header .modal-sub{
+    font-size:12px;
+    opacity:0.8;
+    margin-top:2px;
+  }
+  .modal-close{
+    background:rgba(255,255,255,0.15);
+    border:none;
+    color:var(--white);
+    width:32px;height:32px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+    flex:none;
+  }
+  .modal-body{
+    flex:1;
+    overflow:auto;
+    background:var(--cream);
+  }
+  .modal-body iframe{
+    width:100%;
+    height:100%;
+    min-height:60vh;
+    border:none;
+  }
+  .modal-empty{
+    padding:40px 24px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+  .modal-footer{
+    padding:14px 22px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:flex-end;
+  }
+  .modal-footer a{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--orange-dark);
+    text-decoration:none;
+  }
+
+  footer.page-footer{
+    margin-top:64px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  @media (max-width:560px){
+    .topbar{margin-bottom:36px;}
+    .contact-card{padding:26px 22px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="topbar">
+    <span class="logo-pill"><span class="dot"></span>The Cake Lab</span>
+    <span class="topbar-tag">Tuyển dụng</span>
+  </div>
+
+  <section class="hero">
+    <span class="eyebrow">Gia nhập The Cake Lab</span>
+    <h1>Chào mừng bạn đến với <span>The Cake Lab</span></h1>
+    <p class="lead">Phòng thí nghiệm bánh tạo ra những sản phẩm thủ công dành cho phong cách sống tinh tế, tối giản.</p>
+
+    <div class="social-row">
+      <a class="social-pill" href="http://fb.com/tuyendung.thecakelab/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 10h1.5V8.5A2 2 0 0 1 12.5 6.5h1"/><path d="M9 13.5h6"/><path d="M12.5 13.5V17.5"/></svg>
+        Facebook
+      </a>
+      <a class="social-pill" href="https://www.threads.com/@tuyendung.thecakelab" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.2"/></svg>
+        Instagram
+      </a>
+      <a class="social-pill" href="https://www.threads.com/@tuyendung.thecakelab" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c4.5 0 7 2.6 7 6.4 0 3-1.7 4.6-4 4.9 1.7.5 2.6 1.6 2.6 3.3 0 2.4-2.1 3.9-5 3.9-2.6 0-4.6-1.1-5.4-3"/></svg>
+        Threads
+      </a>
+      <a class="social-pill" href="https://zalo.me/g/pfdfxk719" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12a8 8 0 1 1 3.2 6.4L4 19.5l1.1-3A7.9 7.9 0 0 1 4 12Z"/></svg>
+        Group tuyển dụng
+      </a>
+    </div>
+  </section>
+
+  <section class="contact-card">
+    <h3>Liên hệ</h3>
+    <p class="team-name">Recruitment Team</p>
+    <div class="contact-grid">
+      <div class="contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <div>
+          <div class="label">Email</div>
+          <div class="value"><a href="mailto:thecakelab.recruitment@gmail.com">thecakelab.recruitment@gmail.com</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 4h3.2l1.3 4.2-2 1.6a12 12 0 0 0 5.2 5.2l1.6-2 4.2 1.3V17c0 1.4-1.1 2.5-2.5 2.4C9.7 19 5 14.3 4.6 8 4.5 6.6 4.5 5.4 4.5 4Z"/></svg>
+        <div>
+          <div class="label">Điện thoại</div>
+          <div class="value"><a href="tel:0869886287">086 988 6287</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+        <div>
+          <div class="label">Địa chỉ</div>
+          <div class="value">VP Tầng 4, The Cake Lab số 26 Trung Hoà, Yên Hoà, Hà Nội</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="positions">
+    <div class="positions-head">
+      <h2>Các vị trí đang tuyển dụng</h2>
+    </div>
+    <p class="positions-sub">Danh sách được cập nhật trực tiếp từ hệ thống — nhấn vào một vị trí để xem mô tả công việc (JD).</p>
+    <div id="devBanner" class="dev-banner"></div>
+    <div id="positionsGrid" class="grid">
+      <div class="state-msg">Đang tải danh sách vị trí…</div>
+    </div>
+  </section>
+
+  <footer class="page-footer">© The Cake Lab — Recruitment</footer>
+</div>
+
+<!-- JD MODAL -->
+<div class="modal-overlay" id="jdModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h4 id="modalTitle">Mô tả công việc</h4>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Đóng">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CẤU HÌNH: dán URL Web App Apps Script (Code.gs) đã deploy vào đây.
+  // Ví dụ: 'https://script.google.com/macros/s/AKfycb.../exec'
+  // ============================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAeTLPEw3sICLXieX_fdFNiPlEU_tXhA834ax9xb_ccZWmVKSoEiIJo9JgSQiRDO5B2w/exec';
+
+  // Dữ liệu mẫu (dùng tạm khi chưa gắn Apps Script URL ở trên) —
+  // phản ánh các vị trí đang ở trạng thái Active tại thời điểm build.
+  const FALLBACK_DATA = [
+    { stt:11, khoi:'Khối Kinh Doanh', phongBan:'Bộ phận online', viTri:'Trưởng Nhóm Tư Vấn Online', soLuong:1, jdLabel:'1. JD_TRƯỞNG NHÓM TƯ VẤN ONLINE_13062026', jdUrl:'', ghiChu:'Làm việc tại 26 Trung Hoà, Hà Nội' },
+    { stt:12, khoi:'Khối Kinh Doanh', phongBan:'Bộ phận online', viTri:'Nhân Viên Tư Vấn Online', soLuong:2, jdLabel:'2. JD_NHÂN VIÊN TƯ VẤN ONLINE_13062026', jdUrl:'', ghiChu:'Làm việc tại 26 Trung Hoà, Hà Nội' },
+    { stt:16, khoi:'Khối Kinh Doanh', phongBan:'Cửa hàng', viTri:'Nhân Viên Bán Hàng', soLuong:5, jdLabel:'3. JD_NHÂN VIÊN BÁN HÀNG_13062026', jdUrl:'', ghiChu:'Ca linh hoạt, lương từ 6-8 triệu' },
+    { stt:17, khoi:'Khối Kinh Doanh', phongBan:'Cửa hàng', viTri:'Nhân Viên Pha Chế', soLuong:1, jdLabel:'4. JD_NHÂN VIÊN PHA CHẾ_13062026', jdUrl:'', ghiChu:'' }
+  ];
+
+  function renderPositions(list){
+    const grid = document.getElementById('positionsGrid');
+    grid.innerHTML = '';
+
+    if (!list || list.length === 0){
+      grid.innerHTML = '<div class="state-msg">Hiện chưa có vị trí nào đang mở tuyển. Vui lòng quay lại sau!</div>';
+      return;
+    }
+
+    list.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'job-card';
+      card.innerHTML = `
+        <div class="job-swatch"></div>
+        <div class="job-body">
+          <div class="job-title">${escapeHtml(item.viTri)}</div>
+          <div class="job-dept">${escapeHtml(item.phongBan || item.khoi || '')}</div>
+          ${item.ghiChu ? `<div class="job-note">${escapeHtml(item.ghiChu)}</div>` : ''}
+          <div class="job-meta">
+            <span class="qty-tag">SL: ${item.soLuong ?? '—'}</span>
+            <button class="job-btn" type="button">Xem JD</button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.job-btn').addEventListener('click', () => openModal(item));
+      grid.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, s => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[s]));
+  }
+
+  function toEmbeddableUrl(url){
+    if (!url) return '';
+    // Chuyển link Google Docs/Slides "/edit" hoặc "/view" sang dạng "/preview" để nhúng iframe mượt hơn.
+    if (url.includes('docs.google.com') || url.includes('drive.google.com')){
+      return url.replace(/\/(edit|view)(\?.*)?$/, '/preview');
+    }
+    return url;
+  }
+
+  function openModal(item){
+    const overlay = document.getElementById('jdModal');
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+
+    document.getElementById('modalTitle').textContent = item.viTri;
+    document.getElementById('modalSub').textContent = `${item.phongBan || ''}${item.phongBan ? ' · ' : ''}${item.khoi || ''}`;
+
+    if (item.jdUrl){
+      body.innerHTML = `<iframe src="${toEmbeddableUrl(item.jdUrl)}" title="JD ${escapeHtml(item.viTri)}"></iframe>`;
+      footer.innerHTML = `<a href="${item.jdUrl}" target="_blank" rel="noopener">Mở trong tab mới ↗</a>`;
+    } else {
+      body.innerHTML = `<div class="modal-empty">Chưa có đường dẫn JD cho vị trí này.<br>Vui lòng liên hệ Recruitment Team qua email <b>thecakelab.recruitment@gmail.com</b>.</div>`;
+      footer.innerHTML = '';
+    }
+
+    overlay.classList.add('open');
+  }
+
+  function closeModal(){
+    document.getElementById('jdModal').classList.remove('open');
+    document.getElementById('modalBody').innerHTML = '';
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('jdModal').addEventListener('click', e => {
+    if (e.target.id === 'jdModal') closeModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  async function loadPositions(){
+    const banner = document.getElementById('devBanner');
+
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('REPLACE_WITH')){
+      banner.textContent = 'Chưa gắn Apps Script URL — đang hiển thị dữ liệu mẫu. Dán URL Web App vào biến APPS_SCRIPT_URL trong file này để lấy dữ liệu trực tiếp từ Sheet.';
+      banner.classList.add('show');
+      renderPositions(FALLBACK_DATA);
+      return;
+    }
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const json = await res.json();
+      if (json.success){
+        renderPositions(json.data);
+      } else {
+        throw new Error(json.error || 'Unknown error');
+      }
+    } catch (err){
+      banner.textContent = 'Không tải được dữ liệu trực tiếp (' + err.message + ') — đang hiển thị dữ liệu mẫu.';
+      banner.classList.add('show');
+      renderPositions(FALLBACK_DATA);
+    }
+  }
+
+  loadPositions();
+</script>
+
+</body>
+</html>
