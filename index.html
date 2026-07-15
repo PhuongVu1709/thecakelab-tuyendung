@@ -657,7 +657,7 @@
 
     <div class="social-row">
       <a class="social-pill" href="http://fb.com/tuyendung.thecakelab/" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 10h1.5V8.5A2 2 0 0 1 12.5 6.5h1"/><path d="M9 13.5h6"/><path d="M12.5 13.5V17.5"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.6 9.1h1.7V6.7h-1.8c-2 0-3.2 1.2-3.2 3.3v1.3H8.6v2.5h1.7V18h2.5v-4.2h1.8l.3-2.5h-2.1v-1c0-.6.2-1.2 1.1-1.2Z" fill="currentColor"/></svg>
         Facebook
       </a>
       <a class="social-pill" href="https://www.threads.com/@tuyendung.thecakelab" target="_blank" rel="noopener">
@@ -665,7 +665,7 @@
         Instagram
       </a>
       <a class="social-pill" href="https://www.threads.com/@tuyendung.thecakelab" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c4.5 0 7 2.6 7 6.4 0 3-1.7 4.6-4 4.9 1.7.5 2.6 1.6 2.6 3.3 0 2.4-2.1 3.9-5 3.9-2.6 0-4.6-1.1-5.4-3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M14.7 8.6c-.5-.9-1.5-1.5-2.9-1.5-2.3 0-4 1.8-4 4.9s1.7 4.9 4 4.9c2.1 0 3.4-1 3.7-2.7.3-1.7-.5-2.8-2-3.1-1.1-.2-2.2.1-2.4 1-.2.7.3 1.3 1.1 1.3.6 0 1.1-.2 1.4-.7"/></svg>
         Threads
       </a>
       <a class="social-pill" href="https://zalo.me/g/pfdfxk719" target="_blank" rel="noopener">
@@ -751,8 +751,8 @@
         </div>
 
         <div class="field">
-          <label for="f_email">Email <span class="req">*</span></label>
-          <input type="email" id="f_email" name="email" required autocomplete="email">
+          <label for="f_email">Email <span class="opt">(không bắt buộc)</span></label>
+          <input type="email" id="f_email" name="email" autocomplete="email">
         </div>
 
         <div class="field">
@@ -785,7 +785,7 @@
         </div>
 
         <div class="field field-full">
-          <label>CV <span class="req">*</span></label>
+          <label>CV <span class="opt">(không bắt buộc)</span></label>
           <div class="file-drop" id="fileDrop">
             <input type="file" id="f_cv" name="cv" accept=".pdf,.doc,.docx" hidden>
             <button type="button" class="file-btn" id="fileBtn">Chọn tệp CV</button>
@@ -1128,7 +1128,9 @@
     ok = check(name, name.value.trim().length > 0) && ok;
     ok = check(dob, !!dob.value) && ok;
     ok = check(gender, !!gender.value) && ok;
-    ok = check(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) && ok;
+    // Email không bắt buộc — chỉ kiểm tra định dạng nếu người dùng có điền
+    const emailValue = email.value.trim();
+    ok = check(email, emailValue === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) && ok;
     ok = check(phone, /^(0|\+84)\d{9,10}$/.test(phone.value.trim().replace(/[\s.-]/g,''))) && ok;
     ok = check(address, address.value.trim().length > 0) && ok;
     ok = check(position, !!position.value) && ok;
@@ -1136,9 +1138,8 @@
 
     const genderOk = !!gender.value;
 
-    const cvOk = fileInput.files && fileInput.files.length > 0;
-    if (!cvOk && !firstInvalid) firstInvalid = fileInput;
-    ok = ok && cvOk;
+    // CV không bắt buộc — không chặn submit nếu chưa chọn tệp
+    const cvOk = true;
 
     const locationField = document.getElementById('locationField');
     const locationRequired = locationField.style.display !== 'none';
@@ -1154,11 +1155,10 @@
     const errorBox = document.getElementById('formError');
     errorBox.classList.remove('show');
 
-    const { ok, cvOk, genderOk, locationOk } = validateForm();
+    const { ok, genderOk, locationOk } = validateForm();
     if (!ok){
       let msg = 'Vui lòng điền đầy đủ các trường bắt buộc và kiểm tra lại định dạng Email/SĐT.';
-      if (!cvOk) msg = 'Vui lòng đính kèm CV trước khi gửi.';
-      else if (!genderOk) msg = 'Vui lòng chọn giới tính.';
+      if (!genderOk) msg = 'Vui lòng chọn giới tính.';
       else if (!locationOk) msg = 'Vui lòng chọn địa điểm làm việc.';
       errorBox.textContent = msg;
       errorBox.classList.add('show');
@@ -1170,8 +1170,8 @@
     submitBtn.textContent = 'Đang gửi...';
 
     try {
-      const file = fileInput.files[0];
-      const base64Data = await fileToBase64(file);
+      const file = fileInput.files && fileInput.files[0];
+      const base64Data = file ? await fileToBase64(file) : '';
 
       const payload = {
         hoTen: document.getElementById('f_name').value.trim(),
@@ -1184,8 +1184,8 @@
         diaDiemLamViec: document.getElementById('f_location').value || '',
         kyNangKinhNghiem: document.getElementById('f_skills').value.trim(),
         cauHoiKhac: document.getElementById('f_question').value.trim(),
-        cvFileName: file.name,
-        cvMimeType: file.type || 'application/octet-stream',
+        cvFileName: file ? file.name : '',
+        cvMimeType: file ? (file.type || 'application/octet-stream') : '',
         cvBase64: base64Data
       };
 
