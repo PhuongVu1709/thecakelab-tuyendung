@@ -301,6 +301,24 @@
     justify-content:space-between;
     margin-top:auto;
   }
+  .job-actions{
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+  .job-btn-outline{
+    flex:1;
+    border:1.5px solid var(--blue);
+    background:transparent;
+    color:var(--blue);
+    font-weight:700;
+    font-size:13px;
+    padding:9px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .18s ease, color .18s ease;
+  }
+  .job-btn-outline:hover{background:var(--blue);color:var(--white);}
   .qty-tag{
     font-size:12px;
     font-weight:700;
@@ -310,12 +328,13 @@
     border-radius:8px;
   }
   .job-btn{
+    flex:1;
     border:none;
     background:var(--orange);
     color:var(--white);
     font-weight:700;
-    font-size:13.5px;
-    padding:10px 14px;
+    font-size:13px;
+    padding:9px 10px;
     border-radius:10px;
     cursor:pointer;
     transition:background .18s ease;
@@ -437,6 +456,183 @@
     color:var(--ink-soft);
   }
 
+  /* ---------- APPLY FORM (PHẦN 2) ---------- */
+  .apply-section{ margin-top:64px; }
+
+  .back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:none;
+    background:none;
+    color:var(--blue);
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    padding:0;
+    margin-bottom:20px;
+  }
+  .back-btn:hover{text-decoration:underline;}
+
+  .apply-card{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    padding:32px 34px;
+  }
+
+  .form-alert{
+    display:none;
+    font-size:13.5px;
+    font-weight:600;
+    padding:12px 16px;
+    border-radius:10px;
+    margin-bottom:20px;
+  }
+  .form-alert.show{display:block;}
+  .form-alert-error{
+    background:#FDEAEA;
+    color:#B3261E;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px 24px;
+  }
+  .field{display:flex;flex-direction:column;gap:7px;}
+  .field-full{grid-column:1/-1;}
+
+  .field label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--blue);
+  }
+  .field label .req{color:var(--orange-dark);}
+  .field label .opt{
+    font-weight:500;
+    color:var(--ink-soft);
+    font-size:12px;
+    text-transform:none;
+    letter-spacing:0;
+  }
+
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field input[type="date"],
+  .field select,
+  .field textarea{
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--cream);
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:11px 14px;
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+    width:100%;
+  }
+  .field textarea{resize:vertical;font-family:inherit;line-height:1.55;}
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    border-color:var(--orange);
+    background:var(--white);
+  }
+  .field input.invalid,
+  .field select.invalid,
+  .field textarea.invalid{
+    border-color:#D93025;
+  }
+
+
+  .file-drop{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    background:var(--cream);
+  }
+  .file-btn{
+    border:none;
+    background:var(--blue);
+    color:var(--white);
+    font-weight:700;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:none;
+  }
+  .file-btn:hover{background:#04347f;}
+  .file-name{
+    font-size:13px;
+    color:var(--ink-soft);
+    word-break:break-all;
+  }
+
+  .submit-btn{
+    margin-top:28px;
+    width:100%;
+    border:none;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:700;
+    font-size:15.5px;
+    padding:15px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:background .18s ease, opacity .18s ease;
+  }
+  .submit-btn:hover{background:var(--orange-dark);}
+  .submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .apply-success{
+    display:none;
+    text-align:center;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    padding:48px 34px;
+  }
+  .apply-success.show{display:block;}
+  .success-icon{
+    width:56px;height:56px;
+    border-radius:50%;
+    background:var(--blue-tint);
+    color:var(--blue);
+    font-size:26px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 18px;
+  }
+  .apply-success h3{
+    margin:0 0 10px;
+    color:var(--blue);
+    font-size:20px;
+  }
+  .apply-success p{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.6;
+    max-width:420px;
+    margin:0 auto 24px;
+  }
+
+  @media (max-width:640px){
+    .form-grid{grid-template-columns:1fr;}
+    .apply-card{padding:26px 22px;}
+  }
+
   @media (max-width:560px){
     .topbar{margin-bottom:36px;}
     .contact-card{padding:26px 22px;}
@@ -451,6 +647,8 @@
     <span class="logo-pill"><span class="dot"></span>The Cake Lab</span>
     <span class="topbar-tag">Tuyển dụng</span>
   </div>
+
+  <div id="view-jobs">
 
   <section class="hero">
     <span class="eyebrow">Gia nhập The Cake Lab</span>
@@ -516,6 +714,104 @@
     </div>
   </section>
 
+  </div>
+
+  <div id="view-apply" style="display:none">
+
+  <section class="apply-section" id="apply">
+    <button type="button" class="back-btn" id="backToJobsBtn">← Quay lại danh sách vị trí</button>
+    <div class="positions-head">
+      <h2>Ứng tuyển ngay</h2>
+    </div>
+    <p class="positions-sub">Điền thông tin bên dưới, Recruitment Team sẽ liên hệ lại với bạn sớm nhất có thể.</p>
+
+    <form class="apply-card" id="applyForm" novalidate>
+
+      <div id="formError" class="form-alert form-alert-error"></div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="f_name">Họ và tên <span class="req">*</span></label>
+          <input type="text" id="f_name" name="hoTen" required autocomplete="name">
+        </div>
+
+        <div class="field">
+          <label for="f_dob">Ngày sinh <span class="req">*</span></label>
+          <input type="date" id="f_dob" name="ngaySinh" required>
+        </div>
+
+        <div class="field field-full">
+          <label for="f_gender">Giới tính <span class="req">*</span></label>
+          <select id="f_gender" name="gioiTinh" required>
+            <option value="" disabled selected>— Chọn giới tính —</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="f_email">Email <span class="req">*</span></label>
+          <input type="email" id="f_email" name="email" required autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label for="f_phone">Số điện thoại <span class="req">*</span></label>
+          <input type="tel" id="f_phone" name="soDienThoai" required autocomplete="tel">
+        </div>
+
+        <div class="field field-full">
+          <label for="f_address">Địa chỉ <span class="req">*</span></label>
+          <input type="text" id="f_address" name="diaChi" required autocomplete="street-address">
+        </div>
+
+        <div class="field field-full">
+          <label for="f_position">Vị trí ứng tuyển <span class="req">*</span></label>
+          <select id="f_position" name="viTriUngTuyen" required>
+            <option value="" disabled selected>— Chọn vị trí —</option>
+          </select>
+        </div>
+
+        <div class="field field-full" id="locationField" style="display:none">
+          <label for="f_location">Địa điểm làm việc <span class="req">*</span></label>
+          <select id="f_location" name="diaDiemLamViec">
+            <option value="" disabled selected>— Chọn địa điểm —</option>
+          </select>
+        </div>
+
+        <div class="field field-full">
+          <label for="f_skills">Mô tả kỹ năng, kinh nghiệm <span class="req">*</span></label>
+          <textarea id="f_skills" name="kyNangKinhNghiem" rows="4" required placeholder="Chia sẻ ngắn gọn về kinh nghiệm, kỹ năng nổi bật của bạn..."></textarea>
+        </div>
+
+        <div class="field field-full">
+          <label>CV <span class="req">*</span></label>
+          <div class="file-drop" id="fileDrop">
+            <input type="file" id="f_cv" name="cv" accept=".pdf,.doc,.docx" hidden>
+            <button type="button" class="file-btn" id="fileBtn">Chọn tệp CV</button>
+            <span class="file-name" id="fileName">Chưa chọn tệp — PDF/DOC/DOCX, tối đa 5MB</span>
+          </div>
+        </div>
+
+        <div class="field field-full">
+          <label for="f_question">Câu hỏi khác dành cho The Cake Lab <span class="opt">(không bắt buộc)</span></label>
+          <textarea id="f_question" name="cauHoiKhac" rows="3" placeholder="Bạn có câu hỏi nào muốn gửi tới team tuyển dụng không?"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Gửi hồ sơ ứng tuyển</button>
+    </form>
+
+    <div class="apply-success" id="applySuccess">
+      <div class="success-icon">✓</div>
+      <h3>Đã gửi hồ sơ thành công!</h3>
+      <p>Cảm ơn bạn đã quan tâm ứng tuyển tại The Cake Lab. Recruitment Team sẽ xem xét và liên hệ lại với bạn sớm nhất.</p>
+      <button type="button" class="job-btn-outline" id="applyAgainBtn">Nộp hồ sơ khác</button>
+    </div>
+  </section>
+
+  </div>
+
   <footer class="page-footer">© The Cake Lab — Recruitment</footer>
 </div>
 
@@ -550,7 +846,13 @@
     { stt:17, khoi:'Khối Kinh Doanh', phongBan:'Cửa hàng', viTri:'Nhân Viên Pha Chế', soLuong:1, jdLabel:'4. JD_NHÂN VIÊN PHA CHẾ_13062026', jdUrl:'', ghiChu:'' }
   ];
 
+  let CURRENT_POSITIONS = [];
+  let POSITIONS_INDEX = {};
+
   function renderPositions(list){
+    CURRENT_POSITIONS = list || [];
+    populatePositionSelect(CURRENT_POSITIONS);
+
     const grid = document.getElementById('positionsGrid');
     grid.innerHTML = '';
 
@@ -570,11 +872,15 @@
           ${item.ghiChu ? `<div class="job-note">${formatNote(item.ghiChu)}</div>` : ''}
           <div class="job-meta">
             <span class="qty-tag">SL: ${item.soLuong ?? '—'}</span>
-            <button class="job-btn" type="button">Xem JD</button>
+          </div>
+          <div class="job-actions">
+            <button class="job-btn-outline" type="button" data-action="view-jd">Xem JD</button>
+            <button class="job-btn" type="button" data-action="apply">Ứng tuyển</button>
           </div>
         </div>
       `;
-      card.querySelector('.job-btn').addEventListener('click', () => openModal(item));
+      card.querySelector('[data-action="view-jd"]').addEventListener('click', () => openModal(item));
+      card.querySelector('[data-action="apply"]').addEventListener('click', () => goToApply(item.viTri));
       grid.appendChild(card);
     });
   }
@@ -660,6 +966,261 @@
   }
 
   loadPositions();
+
+  // ============================================================
+  // PHẦN 2 — FORM ỨNG TUYỂN
+  // ============================================================
+
+  function populatePositionSelect(list){
+    const select = document.getElementById('f_position');
+    const currentValue = select.value;
+    select.innerHTML = '<option value="" disabled selected>— Chọn vị trí —</option>';
+
+    // Gộp ghi chú theo từng vị trí (đề phòng có nhiều dòng cùng tên vị trí)
+    POSITIONS_INDEX = {};
+    (list || []).forEach(item => {
+      const key = item.viTri.trim();
+      if (!POSITIONS_INDEX[key]) POSITIONS_INDEX[key] = { ghiChu: [] };
+      if (item.ghiChu) POSITIONS_INDEX[key].ghiChu.push(item.ghiChu);
+    });
+
+    Object.keys(POSITIONS_INDEX).forEach(viTri => {
+      const opt = document.createElement('option');
+      opt.value = viTri;
+      opt.textContent = viTri;
+      select.appendChild(opt);
+    });
+
+    if (currentValue && [...select.options].some(o => o.value === currentValue)){
+      select.value = currentValue;
+    }
+  }
+
+  function goToApply(viTri){
+    document.getElementById('view-jobs').style.display = 'none';
+    document.getElementById('view-apply').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (viTri){
+      const select = document.getElementById('f_position');
+      if ([...select.options].some(o => o.value === viTri)){
+        select.value = viTri;
+      }
+      updateLocationField(select.value);
+    }
+  }
+
+  function backToJobs(){
+    document.getElementById('view-apply').style.display = 'none';
+    document.getElementById('view-jobs').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('backToJobsBtn').addEventListener('click', backToJobs);
+
+  // --- Địa điểm làm việc (chỉ hiện với 1 số vị trí cửa hàng, dựa vào ghi chú) ---
+  const TARGET_POSITIONS_FOR_LOCATION = ['nhân viên bán hàng', 'quản lý cửa hàng'];
+  const KNOWN_LOCATIONS = [
+    { label: 'Tuệ Tĩnh', aliases: ['tuệ tĩnh'] },
+    { label: 'Timescity', aliases: ['timescity', 'times city', 'time city', 'timecity'] },
+    { label: 'Phan Bội Châu', aliases: ['phan bội châu'] },
+    { label: 'Trung Hòa', aliases: ['trung hòa'] }
+  ];
+
+  // Bỏ khoảng trắng + viết thường để so khớp không phụ thuộc cách gõ (vd "Times City" == "Timescity")
+  function normalizeForMatch(str){
+    return String(str || '').toLowerCase().replace(/\s+/g, '');
+  }
+
+  function updateLocationField(viTri){
+    const field = document.getElementById('locationField');
+    const select = document.getElementById('f_location');
+    select.innerHTML = '<option value="" disabled selected>— Chọn địa điểm —</option>';
+
+    const isTargetRole = TARGET_POSITIONS_FOR_LOCATION.includes(String(viTri || '').trim().toLowerCase());
+    const info = POSITIONS_INDEX[viTri];
+    const ghiChuText = (info && info.ghiChu ? info.ghiChu.join(' ') : '').toLowerCase();
+
+    const matchedLocations = isTargetRole
+      ? KNOWN_LOCATIONS
+          .filter(loc => {
+            const normGhiChu = normalizeForMatch(ghiChuText);
+            return loc.aliases.some(alias => normGhiChu.includes(normalizeForMatch(alias)));
+          })
+          .map(loc => loc.label)
+      : [];
+
+    if (matchedLocations.length === 0){
+      field.style.display = 'none';
+      return;
+    }
+
+    field.style.display = '';
+    matchedLocations.forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc;
+      opt.textContent = loc;
+      select.appendChild(opt);
+    });
+  }
+
+  document.getElementById('f_position').addEventListener('change', (e) => {
+    updateLocationField(e.target.value);
+  });
+
+  // --- Chọn tệp CV ---
+  const MAX_CV_SIZE = 5 * 1024 * 1024; // 5MB
+  const fileInput = document.getElementById('f_cv');
+  const fileNameEl = document.getElementById('fileName');
+
+  document.getElementById('fileBtn').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file){
+      fileNameEl.textContent = 'Chưa chọn tệp — PDF/DOC/DOCX, tối đa 5MB';
+      return;
+    }
+    if (file.size > MAX_CV_SIZE){
+      fileNameEl.textContent = 'Tệp quá lớn (tối đa 5MB) — vui lòng chọn tệp khác';
+      fileInput.value = '';
+      return;
+    }
+    fileNameEl.textContent = file.name + ' (' + (file.size/1024/1024).toFixed(2) + ' MB)';
+  });
+
+  function fileToBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('Không đọc được tệp CV'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function toDdMmYyyy(isoDate){
+    if (!isoDate) return '';
+    const [y, m, d] = isoDate.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function setInvalid(el, invalid){
+    el.classList.toggle('invalid', invalid);
+  }
+
+  function validateForm(){
+    let firstInvalid = null;
+    const check = (el, ok) => {
+      setInvalid(el, !ok);
+      if (!ok && !firstInvalid) firstInvalid = el;
+      return ok;
+    };
+
+    const name = document.getElementById('f_name');
+    const dob = document.getElementById('f_dob');
+    const gender = document.getElementById('f_gender');
+    const email = document.getElementById('f_email');
+    const phone = document.getElementById('f_phone');
+    const address = document.getElementById('f_address');
+    const position = document.getElementById('f_position');
+    const skills = document.getElementById('f_skills');
+    const location = document.getElementById('f_location');
+
+    let ok = true;
+    ok = check(name, name.value.trim().length > 0) && ok;
+    ok = check(dob, !!dob.value) && ok;
+    ok = check(gender, !!gender.value) && ok;
+    ok = check(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) && ok;
+    ok = check(phone, /^(0|\+84)\d{9,10}$/.test(phone.value.trim().replace(/[\s.-]/g,''))) && ok;
+    ok = check(address, address.value.trim().length > 0) && ok;
+    ok = check(position, !!position.value) && ok;
+    ok = check(skills, skills.value.trim().length > 0) && ok;
+
+    const genderOk = !!gender.value;
+
+    const cvOk = fileInput.files && fileInput.files.length > 0;
+    if (!cvOk && !firstInvalid) firstInvalid = fileInput;
+    ok = ok && cvOk;
+
+    const locationField = document.getElementById('locationField');
+    const locationRequired = locationField.style.display !== 'none';
+    const locationOk = !locationRequired || !!location.value;
+    if (locationRequired) ok = check(location, !!location.value) && ok;
+
+    return { ok, firstInvalid, genderOk, cvOk, locationOk };
+  }
+
+  document.getElementById('applyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const errorBox = document.getElementById('formError');
+    errorBox.classList.remove('show');
+
+    const { ok, cvOk, genderOk, locationOk } = validateForm();
+    if (!ok){
+      let msg = 'Vui lòng điền đầy đủ các trường bắt buộc và kiểm tra lại định dạng Email/SĐT.';
+      if (!cvOk) msg = 'Vui lòng đính kèm CV trước khi gửi.';
+      else if (!genderOk) msg = 'Vui lòng chọn giới tính.';
+      else if (!locationOk) msg = 'Vui lòng chọn địa điểm làm việc.';
+      errorBox.textContent = msg;
+      errorBox.classList.add('show');
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+
+    try {
+      const file = fileInput.files[0];
+      const base64Data = await fileToBase64(file);
+
+      const payload = {
+        hoTen: document.getElementById('f_name').value.trim(),
+        ngaySinh: toDdMmYyyy(document.getElementById('f_dob').value),
+        gioiTinh: document.getElementById('f_gender').value,
+        email: document.getElementById('f_email').value.trim(),
+        soDienThoai: document.getElementById('f_phone').value.trim(),
+        diaChi: document.getElementById('f_address').value.trim(),
+        viTriUngTuyen: document.getElementById('f_position').value,
+        diaDiemLamViec: document.getElementById('f_location').value || '',
+        kyNangKinhNghiem: document.getElementById('f_skills').value.trim(),
+        cauHoiKhac: document.getElementById('f_question').value.trim(),
+        cvFileName: file.name,
+        cvMimeType: file.type || 'application/octet-stream',
+        cvBase64: base64Data
+      };
+
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // tránh CORS preflight
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+
+      if (!json.success) throw new Error(json.error || 'Gửi hồ sơ thất bại');
+
+      document.getElementById('applyForm').classList.remove('show');
+      document.getElementById('applyForm').style.display = 'none';
+      document.getElementById('applySuccess').classList.add('show');
+      document.getElementById('applySuccess').scrollIntoView({ behavior:'smooth', block:'start' });
+
+    } catch (err){
+      errorBox.textContent = 'Có lỗi khi gửi hồ sơ: ' + err.message + '. Vui lòng thử lại hoặc gửi CV trực tiếp qua email thecakelab.recruitment@gmail.com.';
+      errorBox.classList.add('show');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Gửi hồ sơ ứng tuyển';
+    }
+  });
+
+  document.getElementById('applyAgainBtn').addEventListener('click', () => {
+    document.getElementById('applyForm').reset();
+    document.getElementById('applyForm').style.display = '';
+    document.getElementById('applySuccess').classList.remove('show');
+    document.getElementById('locationField').style.display = 'none';
+    document.getElementById('f_location').innerHTML = '<option value="" disabled selected>— Chọn địa điểm —</option>';
+    fileNameEl.textContent = 'Chưa chọn tệp — PDF/DOC/DOCX, tối đa 5MB';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 </script>
 
 </body>
