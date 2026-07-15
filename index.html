@@ -517,6 +517,17 @@
     text-transform:none;
     letter-spacing:0;
   }
+  .field-hint{
+    margin:-2px 0 2px;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    background:var(--blue-tint);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .field-hint strong{color:var(--blue);}
+  .field-hint em{font-style:italic;color:var(--orange-dark);}
 
   .field input[type="text"],
   .field input[type="email"],
@@ -781,7 +792,12 @@
 
         <div class="field field-full">
           <label for="f_skills">Mô tả kỹ năng, kinh nghiệm <span class="req">*</span></label>
-          <textarea id="f_skills" name="kyNangKinhNghiem" rows="4" required placeholder="Chia sẻ ngắn gọn về kinh nghiệm, kỹ năng nổi bật của bạn..."></textarea>
+          <p class="field-hint">
+            <strong>Bạn đã có kinh nghiệm làm việc ở vị trí tương tự chưa?</strong><br>
+            Nếu có, vui lòng ghi ngắn gọn kinh nghiệm làm việc của mình theo form sau:<br>
+            <em>Vị trí làm việc + Nơi làm việc + Thời gian gắn bó</em>
+          </p>
+          <textarea id="f_skills" name="kyNangKinhNghiem" rows="4" required placeholder="Vd: Nhân viên bán hàng - Cửa hàng ABC - 6 tháng"></textarea>
         </div>
 
         <div class="field field-full">
