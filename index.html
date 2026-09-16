@@ -40,23 +40,10 @@
   a{color:inherit;}
   button{font-family:inherit;}
 
-  html,body{height:100%;}
-  body{overflow:hidden;}
   .page{
     max-width:1040px;
     margin:0 auto;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    padding:0 24px;
-    overflow-x:hidden;
-  }
-  .page-scroll{
-    flex:1;
-    min-height:0;
-    overflow-y:auto;
-    overflow-x:hidden;
-    padding-bottom:80px;
+    padding:32px 24px 80px;
   }
 
   /* ---------- HEADER ---------- */
@@ -64,8 +51,6 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    flex:none;
-    padding-top:32px;
     margin-bottom:56px;
   }
   .logo-pill{
@@ -474,15 +459,6 @@
   /* ---------- APPLY FORM (PHẦN 2) ---------- */
   .apply-section{ margin-top:64px; }
 
-  .apply-sticky-header{
-    position:sticky;
-    top:0;
-    z-index:5;
-    background:var(--cream);
-    padding-top:4px;
-    padding-bottom:4px;
-  }
-
   .back-btn{
     display:inline-flex;
     align-items:center;
@@ -683,8 +659,6 @@
     <span class="topbar-tag">Tuyển dụng</span>
   </div>
 
-  <div class="page-scroll">
-
   <div id="view-jobs">
 
   <section class="hero">
@@ -697,7 +671,7 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.6 9.1h1.7V6.7h-1.8c-2 0-3.2 1.2-3.2 3.3v1.3H8.6v2.5h1.7V18h2.5v-4.2h1.8l.3-2.5h-2.1v-1c0-.6.2-1.2 1.1-1.2Z" fill="currentColor"/></svg>
         Facebook
       </a>
-      <a class="social-pill" href="https://www.threads.com/@tuyendung.thecakelab" target="_blank" rel="noopener">
+      <a class="social-pill" href="https://www.instagram.com/tuyendung.thecakelab/" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.2"/></svg>
         Instagram
       </a>
@@ -756,13 +730,11 @@
   <div id="view-apply" style="display:none">
 
   <section class="apply-section" id="apply">
-    <div class="apply-sticky-header">
-      <button type="button" class="back-btn" id="backToJobsBtn">← Quay lại danh sách vị trí</button>
-      <div class="positions-head">
-        <h2>Ứng tuyển ngay</h2>
-      </div>
-      <p class="positions-sub">Điền thông tin bên dưới, Recruitment Team sẽ liên hệ lại với bạn sớm nhất có thể.</p>
+    <button type="button" class="back-btn" id="backToJobsBtn">← Quay lại danh sách vị trí</button>
+    <div class="positions-head">
+      <h2>Ứng tuyển ngay</h2>
     </div>
+    <p class="positions-sub">Điền thông tin bên dưới, Recruitment Team sẽ liên hệ lại với bạn sớm nhất có thể.</p>
 
     <form class="apply-card" id="applyForm" novalidate>
 
@@ -857,8 +829,6 @@
   </div>
 
   <footer class="page-footer">© The Cake Lab — Recruitment</footer>
-
-  </div>
 </div>
 
 <!-- JD MODAL -->
