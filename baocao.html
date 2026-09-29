@@ -239,6 +239,65 @@
     outline:none;
   }
   .filter-row select{min-width:150px;cursor:pointer;}
+  .ms-dropdown{position:relative;}
+  .ms-btn{
+    font-size:13.5px;
+    font-weight:500;
+    padding:10px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    background:var(--white);
+    color:var(--ink);
+    cursor:pointer;
+    min-width:150px;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .ms-btn.has-selection{border-color:var(--blue);color:var(--blue);font-weight:700;}
+  .ms-btn .caret{font-size:11px;color:var(--ink-soft);}
+  .ms-panel{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;
+    min-width:220px;
+    max-height:280px;
+    overflow:auto;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:8px;
+    z-index:30;
+  }
+  .ms-panel.open{display:block;}
+  .ms-panel-actions{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 6px 8px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:6px;
+  }
+  .ms-panel-actions button{
+    border:none;background:none;color:var(--blue);
+    font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;
+  }
+  .ms-option{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 6px;
+    border-radius:7px;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .ms-option:hover{background:var(--blue-tint);}
+  .ms-option input{cursor:pointer;}
+  .ms-empty{padding:10px 6px;font-size:13px;color:var(--ink-soft);}
   .search-box{position:relative;flex:1;min-width:220px;max-width:280px;}
   .search-box input{width:100%;padding-left:34px;}
   .search-box svg{
@@ -549,10 +608,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
           <input type="text" id="fSearch" placeholder="Tìm ứng viên...">
         </div>
-        <select id="fKhoi"><option value="">Tất cả khối</option></select>
-        <select id="fPhongBan"><option value="">Tất cả phòng ban</option></select>
-        <select id="fViTri"><option value="">Tất cả vị trí</option></select>
-        <select id="fTrangThai"><option value="">Tất cả trạng thái</option></select>
+        <div class="ms-dropdown" id="msKhoi" data-key="khoi" data-label="Tất cả khối"></div>
+        <div class="ms-dropdown" id="msPhongBan" data-key="phongBan" data-label="Tất cả phòng ban"></div>
+        <div class="ms-dropdown" id="msViTri" data-key="viTri" data-label="Tất cả vị trí"></div>
+        <div class="ms-dropdown" id="msTrangThai" data-key="trangThai" data-label="Tất cả trạng thái"></div>
         <span class="date-label">Nộp CV từ</span>
         <input type="date" id="fFrom">
         <span class="date-label">đến</span>
@@ -728,29 +787,94 @@
     return [...new Set(list.filter(Boolean))].sort((a,b) => a.localeCompare(b, 'vi'));
   }
 
+  // ============================================================
+  // BỘ LỌC DẠNG CHỌN NHIỀU (multi-select)
+  // ============================================================
+  const FILTER_STATE = {
+    khoi: new Set(),
+    phongBan: new Set(),
+    viTri: new Set(),
+    trangThai: new Set()
+  };
+
   function populateFilterOptions(){
-    const khoiSel = document.getElementById('fKhoi');
-    const phongBanSel = document.getElementById('fPhongBan');
-    const viTriSel = document.getElementById('fViTri');
-    const trangThaiSel = document.getElementById('fTrangThai');
-
-    const keepValue = (sel) => sel.value;
-    const khoiVal = keepValue(khoiSel), pbVal = keepValue(phongBanSel), vtVal = keepValue(viTriSel), ttVal = keepValue(trangThaiSel);
-
-    khoiSel.innerHTML = '<option value="">Tất cả khối</option>' +
-      uniqueSorted(ALL_APPLICANTS.map(a => a.khoi)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-    phongBanSel.innerHTML = '<option value="">Tất cả phòng ban</option>' +
-      uniqueSorted(ALL_APPLICANTS.map(a => a.phongBan)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-    viTriSel.innerHTML = '<option value="">Tất cả vị trí</option>' +
-      uniqueSorted(ALL_APPLICANTS.map(a => a.viTri)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-    trangThaiSel.innerHTML = '<option value="">Tất cả trạng thái</option>' +
-      STATUS_OPTIONS.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-
-    if (khoiVal) khoiSel.value = khoiVal;
-    if (pbVal) phongBanSel.value = pbVal;
-    if (vtVal) viTriSel.value = vtVal;
-    if (ttVal) trangThaiSel.value = ttVal;
+    buildMultiSelect('msKhoi', uniqueSorted(ALL_APPLICANTS.map(a => a.khoi)));
+    buildMultiSelect('msPhongBan', uniqueSorted(ALL_APPLICANTS.map(a => a.phongBan)));
+    buildMultiSelect('msViTri', uniqueSorted(ALL_APPLICANTS.map(a => a.viTri)));
+    buildMultiSelect('msTrangThai', STATUS_OPTIONS);
   }
+
+  function buildMultiSelect(wrapId, options){
+    const wrap = document.getElementById(wrapId);
+    const key = wrap.dataset.key;
+    const allLabel = wrap.dataset.label;
+    const selectedSet = FILTER_STATE[key];
+
+    // Giữ nguyên lựa chọn cũ nếu option đó vẫn còn tồn tại trong dữ liệu mới
+    [...selectedSet].forEach(v => { if (!options.includes(v)) selectedSet.delete(v); });
+
+    wrap.innerHTML = `
+      <button type="button" class="ms-btn ${selectedSet.size ? 'has-selection' : ''}">
+        <span class="ms-btn-label">${selectedSet.size ? selectedSet.size + ' đã chọn' : allLabel}</span>
+        <span class="caret">▾</span>
+      </button>
+      <div class="ms-panel">
+        <div class="ms-panel-actions">
+          <button type="button" data-act="all">Chọn tất cả</button>
+          <button type="button" data-act="none">Bỏ chọn</button>
+        </div>
+        ${options.length
+          ? options.map(v => `
+            <label class="ms-option">
+              <input type="checkbox" value="${escapeHtml(v)}" ${selectedSet.has(v) ? 'checked' : ''}>
+              <span>${escapeHtml(v)}</span>
+            </label>`).join('')
+          : '<div class="ms-empty">Chưa có dữ liệu</div>'}
+      </div>
+    `;
+
+    const btn = wrap.querySelector('.ms-btn');
+    const panel = wrap.querySelector('.ms-panel');
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.ms-panel.open').forEach(p => { if (p !== panel) p.classList.remove('open'); });
+      panel.classList.toggle('open');
+    });
+
+    panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) selectedSet.add(cb.value);
+        else selectedSet.delete(cb.value);
+        refreshMultiSelectLabel(wrap, allLabel);
+        applyFiltersAndRender();
+      });
+    });
+
+    panel.querySelector('[data-act="all"]').addEventListener('click', () => {
+      options.forEach(v => selectedSet.add(v));
+      panel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+      refreshMultiSelectLabel(wrap, allLabel);
+      applyFiltersAndRender();
+    });
+    panel.querySelector('[data-act="none"]').addEventListener('click', () => {
+      selectedSet.clear();
+      panel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      refreshMultiSelectLabel(wrap, allLabel);
+      applyFiltersAndRender();
+    });
+  }
+
+  function refreshMultiSelectLabel(wrap, allLabel){
+    const key = wrap.dataset.key;
+    const size = FILTER_STATE[key].size;
+    wrap.querySelector('.ms-btn-label').textContent = size ? size + ' đã chọn' : allLabel;
+    wrap.querySelector('.ms-btn').classList.toggle('has-selection', size > 0);
+  }
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.ms-panel.open').forEach(p => p.classList.remove('open'));
+  });
 
   function escapeHtml(str){
     return String(str ?? '').replace(/[&<>"']/g, s => ({
@@ -784,10 +908,6 @@
 
   function applyFiltersAndRender(){
     const search = document.getElementById('fSearch').value.trim().toLowerCase();
-    const khoi = document.getElementById('fKhoi').value;
-    const phongBan = document.getElementById('fPhongBan').value;
-    const viTri = document.getElementById('fViTri').value;
-    const trangThai = document.getElementById('fTrangThai').value;
     const from = document.getElementById('fFrom').value;
     const to = document.getElementById('fTo').value;
 
@@ -796,10 +916,10 @@
         const hay = (a.maCV + ' ' + a.hoTen).toLowerCase();
         if (!hay.includes(search)) return false;
       }
-      if (khoi && a.khoi !== khoi) return false;
-      if (phongBan && a.phongBan !== phongBan) return false;
-      if (viTri && a.viTri !== viTri) return false;
-      if (trangThai && a.trangThai !== trangThai) return false;
+      if (FILTER_STATE.khoi.size && !FILTER_STATE.khoi.has(a.khoi)) return false;
+      if (FILTER_STATE.phongBan.size && !FILTER_STATE.phongBan.has(a.phongBan)) return false;
+      if (FILTER_STATE.viTri.size && !FILTER_STATE.viTri.has(a.viTri)) return false;
+      if (FILTER_STATE.trangThai.size && !FILTER_STATE.trangThai.has(a.trangThai)) return false;
       if ((from || to) && a.thoiGianGui){
         const d = a.thoiGianGui.slice(0,10);
         if (from && d < from) return false;
@@ -873,17 +993,18 @@
 
   // Bộ lọc — gắn sự kiện
   ['fSearch'].forEach(id => document.getElementById(id).addEventListener('input', applyFiltersAndRender));
-  ['fKhoi','fPhongBan','fViTri','fTrangThai','fFrom','fTo'].forEach(id =>
+  ['fFrom','fTo'].forEach(id =>
     document.getElementById(id).addEventListener('change', applyFiltersAndRender)
   );
   document.getElementById('fClear').addEventListener('click', () => {
     document.getElementById('fSearch').value = '';
-    document.getElementById('fKhoi').value = '';
-    document.getElementById('fPhongBan').value = '';
-    document.getElementById('fViTri').value = '';
-    document.getElementById('fTrangThai').value = '';
+    FILTER_STATE.khoi.clear();
+    FILTER_STATE.phongBan.clear();
+    FILTER_STATE.viTri.clear();
+    FILTER_STATE.trangThai.clear();
     document.getElementById('fFrom').value = '';
     document.getElementById('fTo').value = '';
+    populateFilterOptions();
     applyFiltersAndRender();
   });
 
