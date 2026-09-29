@@ -141,13 +141,13 @@
   #dashboard{display:none;height:100vh;overflow:hidden;}
   #dashboard.show{display:flex;flex-direction:column;}
 
-  .dash-page{width:100%;margin:0 auto;padding:24px 32px 20px;display:flex;flex-direction:column;height:100%;min-height:0;}
+  .dash-page{width:100%;margin:0 auto;padding:14px 32px 14px;display:flex;flex-direction:column;height:100%;min-height:0;}
 
   .dash-topbar{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:24px;
+    margin-bottom:10px;
   }
   .logo-pill{
     display:inline-flex;
@@ -175,44 +175,44 @@
   .logout-btn:hover{border-color:var(--red);color:var(--red);}
 
   h1.dash-title{
-    font-size:24px;
+    font-size:19px;
     font-weight:800;
     color:var(--ink);
-    margin:0 0 20px;
+    margin:0 0 10px;
   }
 
   /* Summary cards */
   .summary-row{
     display:grid;
     grid-template-columns:repeat(5,1fr);
-    gap:16px;
-    margin-bottom:22px;
+    gap:12px;
+    margin-bottom:10px;
   }
   .summary-card{
     background:var(--white);
-    border-radius:16px;
+    border-radius:12px;
     border:1px solid var(--line);
     overflow:hidden;
     box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
   }
-  .summary-card .bar{height:5px;}
-  .summary-card .body{padding:18px 20px;}
+  .summary-card .bar{height:4px;}
+  .summary-card .body{padding:9px 14px;}
   .summary-card .label{
-    font-size:12px;
+    font-size:10.5px;
     font-weight:700;
-    letter-spacing:0.08em;
+    letter-spacing:0.07em;
     text-transform:uppercase;
     color:var(--ink-soft);
-    margin-bottom:8px;
+    margin-bottom:2px;
   }
   .summary-card .num{
-    font-size:34px;
+    font-size:22px;
     font-weight:800;
     color:var(--ink);
-    line-height:1;
-    margin-bottom:6px;
+    line-height:1.15;
+    display:inline;
   }
-  .summary-card .unit{font-size:12.5px;color:var(--ink-soft);}
+  .summary-card .unit{font-size:11px;color:var(--ink-soft);margin-left:5px;display:inline;}
   .bar-orange{background:var(--orange);}
   .bar-blue{background:#3B6FE0;}
   .bar-yellow{background:#F0B429;}
@@ -225,17 +225,17 @@
   .filter-row{
     display:flex;
     flex-wrap:wrap;
-    gap:12px;
+    gap:8px;
     align-items:center;
-    margin-bottom:16px;
+    margin-bottom:10px;
   }
   .filter-row input[type="text"],
   .filter-row select,
   .filter-row input[type="date"]{
-    font-size:13.5px;
-    padding:10px 14px;
+    font-size:13px;
+    padding:7px 12px;
     border:1.5px solid var(--line);
-    border-radius:10px;
+    border-radius:9px;
     background:var(--white);
     color:var(--ink);
     outline:none;
@@ -243,11 +243,11 @@
   .filter-row select{min-width:150px;cursor:pointer;}
   .ms-dropdown{position:relative;}
   .ms-btn{
-    font-size:13.5px;
+    font-size:13px;
     font-weight:500;
-    padding:10px 14px;
+    padding:7px 12px;
     border:1.5px solid var(--line);
-    border-radius:10px;
+    border-radius:9px;
     background:var(--white);
     color:var(--ink);
     cursor:pointer;
@@ -315,7 +315,7 @@
   }
   .clear-btn:hover{background:var(--blue-tint);color:var(--blue);}
 
-  .actions-row{display:flex;gap:12px;margin-bottom:20px;align-items:center;}
+  .actions-row{display:flex;gap:10px;margin-bottom:10px;align-items:center;}
   .sticky-head{
     position:sticky;
     top:0;
@@ -326,6 +326,9 @@
     padding-left:32px;
     padding-right:32px;
     box-shadow:0 8px 12px -10px rgba(3,44,125,0.15);
+    max-height:25vh;
+    overflow:hidden;
+    flex:0 0 auto;
   }
   .utility-wrap{position:relative;}
   .utility-menu{
@@ -368,7 +371,7 @@
     color:var(--red);
     font-weight:700;
     font-size:13.5px;
-    padding:10px 16px;
+    padding:7px 14px;
     border-radius:999px;
     cursor:pointer;
   }
@@ -380,8 +383,8 @@
     color:var(--ink);
     font-weight:700;
     font-size:13.5px;
-    padding:10px 16px;
-    border-radius:10px;
+    padding:7px 14px;
+    border-radius:9px;
     cursor:pointer;
   }
   .utility-btn:hover{border-color:var(--blue);}
@@ -391,8 +394,8 @@
     color:var(--white);
     font-weight:700;
     font-size:13.5px;
-    padding:10px 18px;
-    border-radius:10px;
+    padding:7px 16px;
+    border-radius:9px;
     cursor:pointer;
   }
   .add-btn:hover{background:var(--orange-dark);}
