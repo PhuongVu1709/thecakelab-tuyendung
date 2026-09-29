@@ -601,6 +601,7 @@
   }
   .detail-grid.cols-3{grid-template-columns:repeat(3,1fr);}
   .detail-grid.cols-5{grid-template-columns:repeat(5,1fr);}
+  .detail-grid.cols-1{grid-template-columns:1fr;padding-top:0;}
   .detail-field label{
     display:block;
     font-size:11px;
@@ -870,6 +871,9 @@
         <div class="detail-field"><label>Địa chỉ</label><div class="val" id="detailDiaChi">—</div></div>
         <div class="detail-field"><label>Địa điểm làm việc</label><div class="val" id="detailDiaDiem">—</div></div>
         <div class="detail-field"><label>Kinh nghiệm</label><div class="val" id="detailKinhNghiem">—</div></div>
+      </div>
+      <div class="detail-grid cols-1" style="margin-top:0">
+        <div class="detail-field"><label>Câu hỏi khác dành cho The Cake Lab</label><div class="val" id="detailCauHoiKhac">—</div></div>
       </div>
     </div>
 
@@ -1458,6 +1462,7 @@
     setText('detailDiaChi', a.diaChi);
     setText('detailDiaDiem', a.diaDiem);
     setText('detailKinhNghiem', a.kinhNghiem);
+    setText('detailCauHoiKhac', a.cauHoiKhac);
 
     // --- Quá trình ứng tuyển: suy ra từ Trạng thái hiện có (chưa có dữ liệu lịch phỏng vấn/đánh giá/offer riêng) ---
     setText('stageCvDate', formatDateDisplay(a.thoiGianGui));
