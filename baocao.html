@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Cake Lab | Báo cáo tuyển dụng</title>
+<title>The Cake Lab | Danh sách ứng viên</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -96,6 +96,19 @@
     outline:none;
   }
   .login-field input:focus{border-color:var(--orange);background:var(--white);}
+  .password-wrap{position:relative;}
+  .password-wrap input{padding-right:42px;}
+  .toggle-pass{
+    position:absolute;
+    right:6px;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;
+    border:none;background:none;cursor:pointer;
+    color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    border-radius:6px;
+  }
+  .toggle-pass:hover{color:var(--blue);background:var(--blue-tint);}
+  .toggle-pass svg{width:18px;height:18px;}
   .login-btn{
     width:100%;
     border:none;
@@ -307,7 +320,6 @@
   .status-cv-fail{background:var(--red-tint);color:var(--red);}
   .status-phong-van{background:var(--yellow-tint);color:#8A6100;}
   .status-da-tuyen{background:var(--green-tint);color:var(--green);}
-  .status-tu-choi{background:var(--red-tint);color:var(--red);}
   .status-none{background:#EEEBE4;color:var(--ink-soft);}
 
   .cv-link{color:var(--blue);font-weight:700;text-decoration:none;}
@@ -398,7 +410,7 @@
 <div id="loginScreen">
   <form class="login-card" id="loginForm" novalidate>
     <span class="login-logo">The Cake Lab</span>
-    <h2>Báo cáo tuyển dụng</h2>
+    <h2>Danh sách ứng viên</h2>
     <p>Đăng nhập để xem báo cáo ứng viên nội bộ.</p>
 
     <div class="login-error" id="loginError">Sai tên đăng nhập hoặc mật khẩu.</div>
@@ -409,7 +421,12 @@
     </div>
     <div class="login-field">
       <label for="loginPass">Mật khẩu</label>
-      <input type="password" id="loginPass" autocomplete="current-password" required>
+      <div class="password-wrap">
+        <input type="password" id="loginPass" autocomplete="current-password" required>
+        <button type="button" class="toggle-pass" id="togglePass" aria-label="Hiện mật khẩu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" id="eyeIcon"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
     </div>
 
     <button type="submit" class="login-btn">Đăng nhập</button>
@@ -425,7 +442,7 @@
       <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
     </div>
 
-    <h1 class="dash-title">Báo cáo tuyển dụng</h1>
+    <h1 class="dash-title">Danh sách ứng viên</h1>
 
     <div id="dashBanner" class="dash-banner"></div>
 
@@ -550,6 +567,16 @@
     showDashboard();
   }
 
+  document.getElementById('togglePass').addEventListener('click', () => {
+    const input = document.getElementById('loginPass');
+    const icon = document.getElementById('eyeIcon');
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    icon.innerHTML = showing
+      ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A9.4 9.4 0 0 1 12 5c6.5 0 10 7 10 7a15.6 15.6 0 0 1-3.1 3.9M6.6 6.6C4 8.3 2 12 2 12s3.5 7 10 7a9.6 9.6 0 0 0 3.4-.6"/>';
+  });
+
   document.getElementById('loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('loginUser').value.trim();
@@ -580,9 +607,9 @@
   const FALLBACK_APPLICANTS = [
     { maCV:'CV001', hoTen:'Nguyễn Thị Hồng', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
     { maCV:'CV002', hoTen:'Trần Minh Quang', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV003', hoTen:'Lê Thị Thu', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'Phỏng vấn - Pass', cvUrl:'' },
+    { maCV:'CV003', hoTen:'Lê Thị Thu', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'PV - Pass', cvUrl:'' },
     { maCV:'CV004', hoTen:'Phạm Hoàng Anh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV005', hoTen:'Đặng Ngọc Linh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Fail', cvUrl:'' },
+    { maCV:'CV005', hoTen:'Đặng Ngọc Linh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Loại', cvUrl:'' },
     { maCV:'CV006', hoTen:'Vũ Đình Tuấn', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
     { maCV:'CV007', hoTen:'Bùi Thị Lan', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
     { maCV:'CV008', hoTen:'Hoàng Văn Hải', khoi:'Khối sản xuất', phongBan:'Tổ bánh lạnh - sinh nhật', viTri:'Thợ bánh lạnh', trangThai:'Đã tuyển', cvUrl:'' }
@@ -639,7 +666,7 @@
     viTriSel.innerHTML = '<option value="">Tất cả vị trí</option>' +
       uniqueSorted(ALL_APPLICANTS.map(a => a.viTri)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
     trangThaiSel.innerHTML = '<option value="">Tất cả trạng thái</option>' +
-      uniqueSorted(ALL_APPLICANTS.map(a => a.trangThai)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+      STATUS_OPTIONS.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
 
     if (khoiVal) khoiSel.value = khoiVal;
     if (pbVal) phongBanSel.value = pbVal;
@@ -653,24 +680,28 @@
     }[s]));
   }
 
+  const STATUS_OPTIONS = [
+    'CV - Loại', 'CV - Pass', 'Từ chối PV', 'PV - Loại',
+    'PV - Pass', 'Từ chối Offer', 'Đã tuyển', 'Đang chờ kết quả'
+  ];
+
   function statusClass(trangThai){
-    const t = String(trangThai || '').toLowerCase();
+    const t = String(trangThai || '').trim();
     if (!t) return 'status-none';
-    if (t.includes('fail')) return 'status-cv-fail';
-    if (t.includes('từ chối')) return 'status-tu-choi';
-    if (t.includes('đã tuyển')) return 'status-da-tuyen';
-    if (t.includes('phỏng vấn')) return 'status-phong-van';
-    if (t.includes('pass')) return 'status-cv-pass';
-    return 'status-none';
+    if (t === 'CV - Pass') return 'status-cv-pass';
+    if (t === 'PV - Pass') return 'status-phong-van';
+    if (t === 'Đã tuyển') return 'status-da-tuyen';
+    if (t === 'CV - Loại' || t === 'PV - Loại' || t === 'Từ chối PV' || t === 'Từ chối Offer') return 'status-cv-fail';
+    return 'status-none'; // Đang chờ kết quả
   }
 
   function bucketOf(trangThai){
-    const t = String(trangThai || '').toLowerCase();
-    if (t.includes('fail') || t.includes('từ chối')) return 'rejected';
-    if (t.includes('đã tuyển')) return 'hired';
-    if (t.includes('phỏng vấn')) return 'interview';
-    if (t.includes('pass')) return 'pass';
-    return 'none';
+    const t = String(trangThai || '').trim();
+    if (t === 'CV - Pass') return 'pass';
+    if (t === 'PV - Pass') return 'interview';
+    if (t === 'Đã tuyển') return 'hired';
+    if (t === 'CV - Loại' || t === 'PV - Loại' || t === 'Từ chối PV' || t === 'Từ chối Offer') return 'rejected';
+    return 'none'; // Đang chờ kết quả / chưa xử lý — không tính vào 4 thẻ trên
   }
 
   function applyFiltersAndRender(){
