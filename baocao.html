@@ -598,7 +598,7 @@
         </div>
         <div class="summary-card bg-red"><div class="bar bar-red"></div>
           <div class="body">
-            <div class="label">Từ chối</div>
+            <div class="label">Từ chối Offer</div>
             <div class="num" id="stRejected">0</div>
             <div class="unit">ứng viên</div>
           </div>
@@ -910,13 +910,26 @@
     return 'status-none'; // Đang chờ kết quả
   }
 
-  function bucketOf(trangThai){
-    const t = String(trangThai || '').trim();
-    if (t === 'CV - Pass') return 'pass';
-    if (t === 'PV - Pass') return 'interview';
-    if (t === 'Đã tuyển') return 'hired';
-    if (t === 'CV - Loại' || t === 'PV - Loại' || t === 'Từ chối PV' || t === 'Từ chối Offer') return 'rejected';
-    return 'none'; // Đang chờ kết quả / chưa xử lý — không tính vào 4 thẻ trên
+  /**
+   * Logic phễu tuyển dụng: Nộp CV → CV Pass → Đi phỏng vấn → Tuyển dụng.
+   * Mỗi mốc là CỘNG DỒN — ứng viên đã qua phỏng vấn thì vẫn được tính vào "Pass CV",
+   * ứng viên đã được tuyển thì vẫn được tính vào cả "Pass CV" và "Phỏng vấn".
+   */
+  function hasPassedCV(trangThai){
+    // Đã qua vòng CV = mọi trạng thái ở các bước SAU CV (kể cả đã dừng lại ở đó)
+    return ['CV - Pass', 'Từ chối PV', 'PV - Loại', 'PV - Pass', 'Từ chối Offer', 'Đã tuyển']
+      .includes(String(trangThai || '').trim());
+  }
+  function hasInterviewed(trangThai){
+    // Thực sự đã đi phỏng vấn (không tính "Từ chối PV" vì đó là từ chối TRƯỚC khi phỏng vấn)
+    return ['PV - Loại', 'PV - Pass', 'Từ chối Offer', 'Đã tuyển']
+      .includes(String(trangThai || '').trim());
+  }
+  function isHired(trangThai){
+    return String(trangThai || '').trim() === 'Đã tuyển';
+  }
+  function isRejectedOffer(trangThai){
+    return String(trangThai || '').trim() === 'Từ chối Offer';
   }
 
   function applyFiltersAndRender(){
@@ -947,10 +960,10 @@
 
   function renderSummary(list){
     document.getElementById('stTotal').textContent = list.length;
-    document.getElementById('stPass').textContent = list.filter(a => bucketOf(a.trangThai) === 'pass').length;
-    document.getElementById('stInterview').textContent = list.filter(a => bucketOf(a.trangThai) === 'interview').length;
-    document.getElementById('stHired').textContent = list.filter(a => bucketOf(a.trangThai) === 'hired').length;
-    document.getElementById('stRejected').textContent = list.filter(a => bucketOf(a.trangThai) === 'rejected').length;
+    document.getElementById('stPass').textContent = list.filter(a => hasPassedCV(a.trangThai)).length;
+    document.getElementById('stInterview').textContent = list.filter(a => hasInterviewed(a.trangThai)).length;
+    document.getElementById('stHired').textContent = list.filter(a => isHired(a.trangThai)).length;
+    document.getElementById('stRejected').textContent = list.filter(a => isRejectedOffer(a.trangThai)).length;
   }
 
   function renderTable(list){
