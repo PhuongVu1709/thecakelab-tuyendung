@@ -28,12 +28,14 @@
     --yellow-tint:#FDF3D9;
   }
   *{box-sizing:border-box;}
+  html, body{height:100%;}
   body{
     margin:0;
     background:var(--cream);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
+    overflow:hidden;
   }
   h1,h2,h3,.display{font-family:'Be Vietnam Pro',sans-serif;}
   button{font-family:inherit;}
@@ -136,10 +138,10 @@
   .login-error.show{display:block;}
 
   /* ============ DASHBOARD ============ */
-  #dashboard{display:none;}
-  #dashboard.show{display:block;}
+  #dashboard{display:none;height:100vh;overflow:hidden;}
+  #dashboard.show{display:flex;flex-direction:column;}
 
-  .dash-page{width:100%;margin:0 auto;padding:28px 32px 60px;}
+  .dash-page{width:100%;margin:0 auto;padding:24px 32px 20px;display:flex;flex-direction:column;height:100%;min-height:0;}
 
   .dash-topbar{
     display:flex;
@@ -402,7 +404,8 @@
     border:1px solid var(--line);
     overflow:auto;
     box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
-    max-height:calc(100vh - 320px);
+    flex:1;
+    min-height:0;
   }
   table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:1100px;table-layout:fixed;}
   th, td{overflow:hidden;text-overflow:ellipsis;}
