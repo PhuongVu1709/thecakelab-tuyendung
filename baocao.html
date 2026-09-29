@@ -1223,6 +1223,19 @@
     return `${d}/${m}/${y}`;
   }
 
+  // Chuyển link xem Drive (.../file/d/FILE_ID/view...) thành link tải về trực tiếp.
+  function driveDownloadUrl(viewUrl){
+    const m = String(viewUrl || '').match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? `https://drive.google.com/uc?export=download&id=${m[1]}` : viewUrl;
+  }
+
+  // Render "Xem ↗" + "Tải về" cho 1 link file Drive; trả về "Chưa có" nếu không có link.
+  function fileLinksHtml(url){
+    if (!url) return 'Chưa có';
+    return `<a class="cv-link" href="${url}" target="_blank" rel="noopener">Xem ↗</a>
+      <a class="cv-link" href="${driveDownloadUrl(url)}" target="_blank" rel="noopener" style="margin-left:10px">Tải về</a>`;
+  }
+
   const STATUS_OPTIONS = [
     'CV - Loại', 'CV - Pass', 'Từ chối PV', 'PV - Loại',
     'PV - Pass', 'Từ chối Offer', 'Đã tuyển', 'Đang chờ kết quả'
@@ -1559,10 +1572,7 @@
 
     // --- Quá trình ứng tuyển ---
     setText('stageCvDate', formatDateDisplay(a.thoiGianGui));
-    const cvFileEl = document.getElementById('stageCvFile');
-    cvFileEl.innerHTML = a.cvUrl
-      ? `<a class="cv-link" href="${a.cvUrl}" target="_blank" rel="noopener">Xem CV ↗</a>`
-      : 'Chưa có';
+    document.getElementById('stageCvFile').innerHTML = fileLinksHtml(a.cvUrl);
 
     const t = String(a.trangThai || '').trim();
 
@@ -1579,17 +1589,11 @@
     setPill('stagePvResult', pvResult);
 
     // Đánh giá
-    const danhGiaEl = document.getElementById('viewDanhGiaFile');
-    danhGiaEl.innerHTML = a.danhGiaUrl
-      ? `<a class="cv-link" href="${a.danhGiaUrl}" target="_blank" rel="noopener">Xem tệp ↗</a>`
-      : 'Chưa có';
+    document.getElementById('viewDanhGiaFile').innerHTML = fileLinksHtml(a.danhGiaUrl);
 
     // Offer
     setText('viewNgayOffer', formatDateDisplay(a.ngayOffer) !== '—' ? formatDateDisplay(a.ngayOffer) : a.ngayOffer);
-    const offerFileEl = document.getElementById('viewOfferFile');
-    offerFileEl.innerHTML = a.offerUrl
-      ? `<a class="cv-link" href="${a.offerUrl}" target="_blank" rel="noopener">Xem tệp ↗</a>`
-      : 'Chưa có';
+    document.getElementById('viewOfferFile').innerHTML = fileLinksHtml(a.offerUrl);
     let offerResult = a.ketQuaOffer || (t === 'Từ chối Offer' || t === 'Đã tuyển' ? t : '');
     setPill('stageOfferResult', offerResult);
   }
@@ -1613,13 +1617,47 @@
   // ============================================================
   // CHỈNH SỬA "QUÁ TRÌNH ỨNG TUYỂN"
   // ============================================================
+  let REMOVE_DANHGIA = false;
+  let REMOVE_OFFER = false;
+
   function findCurrentApplicant(){
     return ALL_APPLICANTS.find(x => x.maCV === CURRENT_DETAIL_CODE);
+  }
+
+  function renderDanhGiaFileBox(a){
+    const el = document.getElementById('currentDanhGiaFile');
+    if (REMOVE_DANHGIA){
+      el.innerHTML = `<span style="color:var(--red)">Sẽ xoá tệp khi lưu.</span> <a href="#" class="cv-link" data-undo>Hoàn tác</a>`;
+      el.querySelector('[data-undo]').addEventListener('click', (e) => { e.preventDefault(); REMOVE_DANHGIA = false; renderDanhGiaFileBox(a); });
+      return;
+    }
+    if (!a.danhGiaUrl){ el.innerHTML = 'Chưa có tệp'; return; }
+    el.innerHTML = `<a class="cv-link" href="${a.danhGiaUrl}" target="_blank" rel="noopener">Xem ↗</a>
+      <a class="cv-link" href="${driveDownloadUrl(a.danhGiaUrl)}" target="_blank" rel="noopener" style="margin-left:8px">Tải về</a>
+      <a href="#" class="cv-link" data-remove style="margin-left:8px;color:var(--red)">Xoá tệp</a>`;
+    el.querySelector('[data-remove]').addEventListener('click', (e) => { e.preventDefault(); REMOVE_DANHGIA = true; renderDanhGiaFileBox(a); });
+  }
+
+  function renderOfferFileBox(a){
+    const el = document.getElementById('currentOfferFile');
+    if (REMOVE_OFFER){
+      el.innerHTML = `<span style="color:var(--red)">Sẽ xoá tệp khi lưu.</span> <a href="#" class="cv-link" data-undo>Hoàn tác</a>`;
+      el.querySelector('[data-undo]').addEventListener('click', (e) => { e.preventDefault(); REMOVE_OFFER = false; renderOfferFileBox(a); });
+      return;
+    }
+    if (!a.offerUrl){ el.innerHTML = 'Chưa có tệp'; return; }
+    el.innerHTML = `<a class="cv-link" href="${a.offerUrl}" target="_blank" rel="noopener">Xem ↗</a>
+      <a class="cv-link" href="${driveDownloadUrl(a.offerUrl)}" target="_blank" rel="noopener" style="margin-left:8px">Tải về</a>
+      <a href="#" class="cv-link" data-remove style="margin-left:8px;color:var(--red)">Xoá tệp</a>`;
+    el.querySelector('[data-remove]').addEventListener('click', (e) => { e.preventDefault(); REMOVE_OFFER = true; renderOfferFileBox(a); });
   }
 
   function enterEditMode(){
     const a = findCurrentApplicant();
     if (!a) return;
+
+    REMOVE_DANHGIA = false;
+    REMOVE_OFFER = false;
 
     document.getElementById('editKetQuaCV').value = a.ketQuaCV || '';
     document.getElementById('editGioPV').value = a.gioPV || '';
@@ -1631,10 +1669,9 @@
     document.getElementById('editKetQuaOffer').value = a.ketQuaOffer || '';
     document.getElementById('editDanhGiaFile').value = '';
     document.getElementById('editOfferFile').value = '';
-    document.getElementById('currentDanhGiaFile').innerHTML = a.danhGiaUrl
-      ? `<a class="cv-link" href="${a.danhGiaUrl}" target="_blank" rel="noopener">Tệp hiện tại ↗</a>` : 'Chưa có tệp';
-    document.getElementById('currentOfferFile').innerHTML = a.offerUrl
-      ? `<a class="cv-link" href="${a.offerUrl}" target="_blank" rel="noopener">Tệp hiện tại ↗</a>` : 'Chưa có tệp';
+
+    renderDanhGiaFileBox(a);
+    renderOfferFileBox(a);
 
     document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.edit-mode').forEach(el => el.style.display = '');
@@ -1681,15 +1718,17 @@
         ketQuaCV: document.getElementById('editKetQuaCV').value,
         ketQuaPV: document.getElementById('editKetQuaPV').value,
         ngayOffer: document.getElementById('editNgayOffer').value,
-        ketQuaOffer: document.getElementById('editKetQuaOffer').value
+        ketQuaOffer: document.getElementById('editKetQuaOffer').value,
+        removeDanhGia: REMOVE_DANHGIA,
+        removeOffer: REMOVE_OFFER
       };
 
-      if (danhGiaFile){
+      if (danhGiaFile && !REMOVE_DANHGIA){
         payload.danhGiaFileName = danhGiaFile.name;
         payload.danhGiaMimeType = danhGiaFile.type || 'application/pdf';
         payload.danhGiaBase64 = await fileToBase64(danhGiaFile);
       }
-      if (offerFile){
+      if (offerFile && !REMOVE_OFFER){
         payload.offerFileName = offerFile.name;
         payload.offerMimeType = offerFile.type || 'application/pdf';
         payload.offerBase64 = await fileToBase64(offerFile);
@@ -1703,20 +1742,21 @@
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Lưu thất bại');
 
-      // Cập nhật lại dữ liệu tại chỗ, không cần tải lại cả danh sách
+      // Cập nhật lại dữ liệu tại chỗ bằng URL THẬT server vừa trả về — không cần tải lại cả danh sách
       Object.assign(a, {
         gioPV: payload.gioPV, ngayPV: payload.ngayPV, diaDiemPV: payload.diaDiemPV, nguoiPV: payload.nguoiPV,
         ketQuaCV: payload.ketQuaCV, ketQuaPV: payload.ketQuaPV,
         ngayOffer: payload.ngayOffer, ketQuaOffer: payload.ketQuaOffer,
         trangThai: payload.ketQuaOffer || payload.ketQuaPV || payload.ketQuaCV || a.trangThai
       });
-      if (danhGiaFile) a.danhGiaUrl = 'pending'; // link thật sẽ có ở lần tải lại tiếp theo
-      if (offerFile) a.offerUrl = 'pending';
+      // URL thật (hoặc rỗng nếu vừa xoá) lấy trực tiếp từ phản hồi server — không cần tải lại cả danh sách
+      if (json.danhGiaUrl !== undefined) a.danhGiaUrl = json.danhGiaUrl;
+      if (json.offerUrl !== undefined) a.offerUrl = json.offerUrl;
 
       populateDetailView(a);
       exitEditMode();
+      applyFiltersAndRender(); // cập nhật lại bảng + 5 thẻ tổng hợp từ dữ liệu vừa sửa, không cần gọi mạng lại
       showToast('Đã lưu thay đổi.');
-      loadApplicants(); // đồng bộ lại link Drive thật + số liệu tổng hợp ở màn danh sách
     } catch (err){
       showToast('Lỗi khi lưu: ' + err.message);
     } finally {
