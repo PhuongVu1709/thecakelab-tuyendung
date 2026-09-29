@@ -1035,7 +1035,8 @@
             </select>
           </div>
 
-          <div class="detail-field"><label>Thời gian phản hồi</label><div class="val" id="viewThoiGianPhanHoi">—</div></div>
+          <div class="detail-field view-mode"><label>Thời gian phản hồi</label><div class="val" id="viewThoiGianPhanHoi">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Thời gian phản hồi</label><input type="text" id="editThoiGianPhanHoi" placeholder="Vd: 17h ngày 01/10/2026"></div>
         </div>
 
         <div class="interview-actions edit-mode" style="display:none">
@@ -1103,10 +1104,6 @@
       <button class="modal-close" id="messageModalClose">✕</button>
     </div>
     <div class="modal-body">
-      <div class="email-field">
-        <label>Thời gian xác nhận (hạn phản hồi)</label>
-        <input type="text" id="msgHanXacNhan" placeholder="Vd: 17h ngày 01/10/2026">
-      </div>
       <p style="margin:0 0 10px;font-size:13px;color:var(--ink-soft)">Sao chép nội dung bên dưới để gửi cho ứng viên qua tin nhắn/Zalo:</p>
       <textarea id="messagePreview"></textarea>
     </div>
@@ -1125,10 +1122,6 @@
       <button class="modal-close" id="emailModalClose">✕</button>
     </div>
     <div class="modal-body">
-      <div class="email-field">
-        <label>Thời gian xác nhận (hạn phản hồi)</label>
-        <input type="text" id="emailHanXacNhan" placeholder="Vd: 17h ngày 01/10/2026">
-      </div>
       <div class="email-field">
         <label>Email người gửi</label>
         <select id="emailFrom">
@@ -1809,6 +1802,7 @@
     document.getElementById('editDiaDiemPV').value = a.diaDiemPV || '';
     document.getElementById('editNguoiPV').value = a.nguoiPV || '';
     document.getElementById('editKetQuaPV').value = a.ketQuaPV || '';
+    document.getElementById('editThoiGianPhanHoi').value = a.thoiGianPhanHoi || '';
     document.getElementById('editNgayOffer').value = a.ngayOffer || '';
     document.getElementById('editKetQuaOffer').value = a.ketQuaOffer || '';
     document.getElementById('editDanhGiaFile').value = '';
@@ -1861,6 +1855,7 @@
         nguoiPV: document.getElementById('editNguoiPV').value.trim(),
         ketQuaCV: document.getElementById('editKetQuaCV').value,
         ketQuaPV: document.getElementById('editKetQuaPV').value,
+        thoiGianPhanHoi: document.getElementById('editThoiGianPhanHoi').value.trim(),
         ngayOffer: document.getElementById('editNgayOffer').value,
         ketQuaOffer: document.getElementById('editKetQuaOffer').value,
         removeDanhGia: REMOVE_DANHGIA,
@@ -1889,7 +1884,7 @@
       // Cập nhật lại dữ liệu tại chỗ bằng URL THẬT server vừa trả về — không cần tải lại cả danh sách
       Object.assign(a, {
         gioPV: payload.gioPV, ngayPV: payload.ngayPV, diaDiemPV: payload.diaDiemPV, nguoiPV: payload.nguoiPV,
-        ketQuaCV: payload.ketQuaCV, ketQuaPV: payload.ketQuaPV,
+        ketQuaCV: payload.ketQuaCV, ketQuaPV: payload.ketQuaPV, thoiGianPhanHoi: payload.thoiGianPhanHoi,
         ngayOffer: payload.ngayOffer, ketQuaOffer: payload.ketQuaOffer,
         trangThai: payload.ketQuaOffer || payload.ketQuaPV || payload.ketQuaCV || a.trangThai
       });
@@ -1927,12 +1922,12 @@
   // Hoạt động như nhau trên cả bản text thuần lẫn bản HTML (placeholder luôn là text thường, không nằm trong thẻ).
   function fillInterviewTemplate(text, ctx){
     return String(text || '')
-      .replace(/\[Tên ứng viên\]/g, ctx.hoTen || '')
-      .replace(/\[Vị trí tuyển dụng\]/g, ctx.viTri || '')
-      .replace(/\[Giờ\]/g, ctx.gio || '')
-      .replace(/\[Ngày phỏng vấn\]/g, ctx.ngay || '')
-      .replace(/\[Địa điểm phỏng vấn\]/g, ctx.diaDiem || '')
-      .replace(/\[Thời gian xác nhận\]/g, ctx.hanXacNhan || '');
+      .replace(/\[Tên ứng viên\]/gi, ctx.hoTen || '')
+      .replace(/\[Vị trí tuyển dụng\]/gi, ctx.viTri || '')
+      .replace(/\[Giờ\]/gi, ctx.gio || '')
+      .replace(/\[Ngày phỏng vấn\]/gi, ctx.ngay || '')
+      .replace(/\[Địa điểm phỏng vấn\]/gi, ctx.diaDiem || '')
+      .replace(/\[Thời gian xác nhận\]/gi, ctx.hanXacNhan || '');
   }
 
   function getInterviewBaseContext(){
@@ -1942,7 +1937,8 @@
       viTri: a ? a.viTri : '',
       gio: document.getElementById('editGioPV').value,
       ngay: formatDateDisplay(document.getElementById('editNgayPV').value),
-      diaDiem: document.getElementById('editDiaDiemPV').value.trim()
+      diaDiem: document.getElementById('editDiaDiemPV').value.trim(),
+      hanXacNhan: document.getElementById('editThoiGianPhanHoi').value.trim()
     };
   }
 
@@ -1951,34 +1947,26 @@
       showToast('Vui lòng nhập Giờ, Ngày và Địa điểm phỏng vấn trước.');
       return false;
     }
+    if (!ctx.hanXacNhan){
+      showToast('Vui lòng nhập "Thời gian phản hồi" trước.');
+      return false;
+    }
     return true;
   }
 
   // --- Gửi tin nhắn ---
-  let MSG_BASE_CTX = null;
-
-  function renderMessagePreview(){
-    if (!MSG_BASE_CTX || !INTERVIEW_TEMPLATES) return;
-    const ctx = Object.assign({}, MSG_BASE_CTX, { hanXacNhan: document.getElementById('msgHanXacNhan').value.trim() });
-    document.getElementById('messagePreview').value = fillInterviewTemplate(INTERVIEW_TEMPLATES.message, ctx);
-  }
-
   document.getElementById('btnSendMessage').addEventListener('click', async () => {
     const ctx = getInterviewBaseContext();
     if (!validateInterviewBase(ctx)) return;
 
     try {
-      await getInterviewTemplates();
-      MSG_BASE_CTX = ctx;
-      document.getElementById('msgHanXacNhan').value = '';
-      renderMessagePreview();
+      const tpl = await getInterviewTemplates();
+      document.getElementById('messagePreview').value = fillInterviewTemplate(tpl.message, ctx);
       document.getElementById('messageModal').classList.add('open');
     } catch (err){
       showToast('Lỗi: ' + err.message);
     }
   });
-
-  document.getElementById('msgHanXacNhan').addEventListener('input', renderMessagePreview);
 
   document.getElementById('messageModalClose').addEventListener('click', () => document.getElementById('messageModal').classList.remove('open'));
   document.getElementById('messageModalCancel').addEventListener('click', () => document.getElementById('messageModal').classList.remove('open'));
@@ -1993,44 +1981,9 @@
       document.execCommand('copy');
     }
     showToast('Đã sao chép nội dung tin nhắn.');
-
-    const a = findCurrentApplicant();
-    if (!a) return;
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'markMessageCopied', maCV: a.maCV })
-      });
-      const json = await res.json();
-      if (json.success){
-        a.thoiGianPhanHoi = json.thoiGianPhanHoi;
-        setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
-      }
-    } catch (err){ /* không chặn UI nếu ghi log thất bại */ }
   });
 
   // --- Gửi email (giữ đúng định dạng đậm/nghiêng/màu từ mẫu Sheet) ---
-  let EMAIL_BASE_CTX = null;
-
-  function renderEmailPreview(){
-    if (!EMAIL_BASE_CTX || !INTERVIEW_TEMPLATES) return;
-    const ctx = Object.assign({}, EMAIL_BASE_CTX, { hanXacNhan: document.getElementById('emailHanXacNhan').value.trim() });
-    const tpl = INTERVIEW_TEMPLATES;
-
-    const subject = fillInterviewTemplate(tpl.emailSubject, ctx);
-    const bodyHtml = fillInterviewTemplate(tpl.emailBodyHtml, ctx) + '<br><br>' + fillInterviewTemplate(tpl.signatureHtml, ctx);
-    const bodyText = fillInterviewTemplate(tpl.emailBody, ctx) + '\n\n' + fillInterviewTemplate(tpl.signature, ctx);
-
-    document.getElementById('emailSubjectPreview').value = subject;
-    document.getElementById('emailBodyPreview').innerHTML = bodyHtml;
-
-    const modal = document.getElementById('emailModal');
-    modal.dataset.subject = subject;
-    modal.dataset.bodyHtml = bodyHtml;
-    modal.dataset.bodyText = bodyText;
-  }
-
   document.getElementById('btnSendEmail').addEventListener('click', async () => {
     const ctx = getInterviewBaseContext();
     if (!validateInterviewBase(ctx)) return;
@@ -2039,18 +1992,18 @@
     if (!a) return;
 
     try {
-      await getInterviewTemplates();
-      EMAIL_BASE_CTX = ctx;
-      document.getElementById('emailHanXacNhan').value = '';
+      const tpl = await getInterviewTemplates();
+      const subject = fillInterviewTemplate(tpl.emailSubject, ctx);
+      const bodyHtml = fillInterviewTemplate(tpl.emailBodyHtml, ctx) + '<br><br>' + fillInterviewTemplate(tpl.signatureHtml, ctx);
+
       document.getElementById('emailTo').value = a.email || '';
-      renderEmailPreview();
+      document.getElementById('emailSubjectPreview').value = subject;
+      document.getElementById('emailBodyPreview').innerHTML = bodyHtml;
       document.getElementById('emailModal').classList.add('open');
     } catch (err){
       showToast('Lỗi: ' + err.message);
     }
   });
-
-  document.getElementById('emailHanXacNhan').addEventListener('input', renderEmailPreview);
 
   document.getElementById('emailModalClose').addEventListener('click', () => document.getElementById('emailModal').classList.remove('open'));
   document.getElementById('emailModalCancel').addEventListener('click', () => document.getElementById('emailModal').classList.remove('open'));
