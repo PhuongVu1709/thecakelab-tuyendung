@@ -515,6 +515,149 @@
   .detail-row .k{width:150px;flex:none;font-weight:700;color:var(--blue);}
   .detail-row .v{color:var(--ink);word-break:break-word;}
 
+  /* ---------- CHI TIẾT ỨNG VIÊN (màn hình riêng) ---------- */
+  .detail-page{
+    display:none;
+    height:100%;
+    overflow:auto;
+    padding:20px 32px 40px;
+  }
+  .detail-page.show{display:block;}
+
+  .detail-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .back-btn-detail{
+    border:1.5px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .back-btn-detail:hover{border-color:var(--blue);color:var(--blue);}
+  .detail-actions{display:flex;gap:10px;}
+  .detail-edit-btn{
+    border:1.5px solid var(--blue);
+    background:var(--white);
+    color:var(--blue);
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .detail-edit-btn:hover{background:var(--blue-tint);}
+  .detail-delete-btn{
+    border:none;
+    background:#D3453B;
+    color:var(--white);
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .detail-delete-btn:hover{background:var(--red);}
+
+  .detail-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .detail-card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-weight:800;
+    font-size:15px;
+    color:var(--ink);
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    background:var(--cream);
+  }
+  .detail-macv-badge{
+    background:var(--blue-tint);
+    color:var(--blue);
+    font-weight:700;
+    font-size:12.5px;
+    padding:5px 12px;
+    border-radius:999px;
+  }
+  .detail-grid{
+    display:grid;
+    gap:18px;
+    padding:18px 20px;
+  }
+  .detail-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  .detail-grid.cols-5{grid-template-columns:repeat(5,1fr);}
+  .detail-field label{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .detail-field .val{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .pill-soft{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:4px 11px;
+    border-radius:999px;
+    background:#EEEBE4;
+    color:var(--ink-soft);
+  }
+  .pill-soft.pass{background:var(--blue-tint);color:var(--blue);}
+  .pill-soft.fail{background:var(--red-tint);color:var(--red);}
+  .pill-soft.hired{background:var(--green-tint);color:var(--green);}
+
+  .stage-row{
+    display:flex;
+    gap:20px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    align-items:flex-start;
+  }
+  .stage-row:last-child{border-bottom:none;}
+  .stage-label{
+    flex:0 0 160px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    color:var(--ink);
+    font-size:14px;
+  }
+  .stage-fields{
+    flex:1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+  }
+  .stage-fields .detail-field{min-width:130px;}
+
+  @media (max-width:900px){
+    .detail-grid.cols-3, .detail-grid.cols-5{grid-template-columns:repeat(2,1fr);}
+    .stage-row{flex-direction:column;}
+  }
+
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
     background:var(--ink);color:var(--white);
@@ -564,7 +707,7 @@
 
 <!-- ============ DASHBOARD ============ -->
 <div id="dashboard">
-  <div class="dash-page">
+  <div class="dash-page" id="viewList">
 
     <div class="sticky-head">
       <div class="dash-topbar">
@@ -690,17 +833,88 @@
     </div>
 
   </div>
-</div>
 
-<!-- Xem chi tiết ứng viên -->
-<div class="modal-overlay" id="viewModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h4 id="viewModalTitle">Chi tiết ứng viên</h4>
-      <button class="modal-close" id="viewModalClose">✕</button>
+  <!-- ============ CHI TIẾT ỨNG VIÊN (màn hình riêng) ============ -->
+  <div class="detail-page" id="viewDetail">
+    <div class="detail-topbar">
+      <button class="back-btn-detail" id="detailBackBtn">← Danh sách ứng viên</button>
+      <span class="status-pill" id="detailStatusPill"></span>
+      <div class="detail-actions">
+        <button class="detail-edit-btn" id="detailEditBtn">✏️ Chỉnh sửa</button>
+        <button class="detail-delete-btn" id="detailDeleteBtn">🗑️ Xóa</button>
+      </div>
     </div>
-    <div class="modal-body" id="viewModalBody"></div>
+
+    <div class="detail-card">
+      <div class="detail-card-head">
+        <span>🎯 Vị trí ứng tuyển</span>
+        <span class="detail-macv-badge" id="detailMaCV"></span>
+      </div>
+      <div class="detail-grid cols-3">
+        <div class="detail-field"><label>Khối</label><div class="val" id="detailKhoi">—</div></div>
+        <div class="detail-field"><label>Phòng ban</label><div class="val" id="detailPhongBan">—</div></div>
+        <div class="detail-field"><label>Vị trí ứng tuyển</label><div class="val" id="detailViTri">—</div></div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card-head"><span>👤 Thông tin ứng viên</span></div>
+      <div class="detail-grid cols-5">
+        <div class="detail-field"><label>Họ và tên</label><div class="val" id="detailHoTen">—</div></div>
+        <div class="detail-field"><label>Ngày sinh</label><div class="val" id="detailNgaySinh">—</div></div>
+        <div class="detail-field"><label>Giới tính</label><div class="val" id="detailGioiTinh">—</div></div>
+        <div class="detail-field"><label>Email</label><div class="val" id="detailEmail">—</div></div>
+        <div class="detail-field"><label>Số điện thoại</label><div class="val" id="detailSdt">—</div></div>
+      </div>
+      <div class="detail-grid cols-3" style="margin-top:14px">
+        <div class="detail-field"><label>Địa chỉ</label><div class="val" id="detailDiaChi">—</div></div>
+        <div class="detail-field"><label>Địa điểm làm việc</label><div class="val" id="detailDiaDiem">—</div></div>
+        <div class="detail-field"><label>Kinh nghiệm</label><div class="val" id="detailKinhNghiem">—</div></div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card-head"><span>📊 Quá trình ứng tuyển</span></div>
+
+      <div class="stage-row">
+        <div class="stage-label">📄 CV</div>
+        <div class="stage-fields">
+          <div class="detail-field"><label>Ngày nộp</label><div class="val" id="stageCvDate">—</div></div>
+          <div class="detail-field"><label>Tệp đính kèm</label><div class="val" id="stageCvFile">Chưa có</div></div>
+          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stageCvResult">Chưa có</span></div></div>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">🗓️ Phỏng vấn</div>
+        <div class="stage-fields">
+          <div class="detail-field"><label>Giờ</label><div class="val">—</div></div>
+          <div class="detail-field"><label>Ngày</label><div class="val">—</div></div>
+          <div class="detail-field"><label>Địa điểm</label><div class="val">—</div></div>
+          <div class="detail-field"><label>Người phỏng vấn</label><div class="val">—</div></div>
+          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stagePvResult">Chưa có</span></div></div>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">📋 Đánh giá</div>
+        <div class="stage-fields">
+          <div class="detail-field"><label>Tệp phiếu đánh giá</label><div class="val">Chưa có</div></div>
+          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft">Chưa có</span></div></div>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">🤝 Offer</div>
+        <div class="stage-fields">
+          <div class="detail-field"><label>Ngày offer</label><div class="val">—</div></div>
+          <div class="detail-field"><label>Tệp thư offer</label><div class="val">Chưa có</div></div>
+          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stageOfferResult">Chưa có</span></div></div>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1025,7 +1239,7 @@
         </td>
       `;
 
-      tr.querySelector('[data-action="view"]').addEventListener('click', () => openViewModal(a));
+      tr.querySelector('[data-action="view"]').addEventListener('click', () => showDetailView(a));
       tr.querySelector('[data-action="edit"]').addEventListener('click', () => showToast('Chức năng chỉnh sửa đang được phát triển.'));
       tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteApplicants([a.maCV]));
       tr.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
@@ -1196,42 +1410,91 @@
   document.getElementById('addBtn').addEventListener('click', () => showToast('Chức năng thêm ứng viên thủ công đang được phát triển.'));
 
   // ============================================================
-  // MODAL XEM CHI TIẾT
+  // MÀN HÌNH CHI TIẾT ỨNG VIÊN
   // ============================================================
-  function openViewModal(a){
-    document.getElementById('viewModalTitle').textContent = a.hoTen + ' — ' + a.maCV;
-    const rows = [
-      ['Ngày ứng tuyển', formatDateDisplay(a.thoiGianGui) !== '—' ? formatDateDisplay(a.thoiGianGui) : ''],
-      ['Vị trí ứng tuyển', a.viTri],
-      ['Khối / Phòng ban', [a.khoi, a.phongBan].filter(Boolean).join(' / ')],
-      ['Trạng thái', a.trangThai || 'Chưa xử lý'],
-      ['Ngày sinh', a.ngaySinh],
-      ['Giới tính', a.gioiTinh],
-      ['Email', a.email],
-      ['Số điện thoại', a.soDienThoai],
-      ['Địa chỉ', a.diaChi],
-      ['Địa điểm làm việc', a.diaDiem],
-      ['Kinh nghiệm', a.kinhNghiem],
-      ['Câu hỏi khác', a.cauHoiKhac],
-      ['CV', a.cvUrl ? `<a class="cv-link" href="${a.cvUrl}" target="_blank" rel="noopener">Mở CV ↗</a>` : 'Chưa có']
-    ];
+  let CURRENT_DETAIL_CODE = '';
 
-    const body = document.getElementById('viewModalBody');
-    body.innerHTML = rows
-      .filter(([, v]) => v)
-      .map(([k, v]) => `<div class="detail-row"><div class="k">${escapeHtml(k)}</div><div class="v">${k === 'CV' ? v : escapeHtml(v)}</div></div>`)
-      .join('');
-
-    document.getElementById('viewModal').classList.add('open');
+  function showDetailView(a){
+    CURRENT_DETAIL_CODE = a.maCV;
+    populateDetailView(a);
+    document.getElementById('viewList').style.display = 'none';
+    document.getElementById('viewDetail').classList.add('show');
+    document.getElementById('viewDetail').scrollTop = 0;
   }
 
-  function closeViewModal(){
-    document.getElementById('viewModal').classList.remove('open');
+  function showListView(){
+    document.getElementById('viewDetail').classList.remove('show');
+    document.getElementById('viewList').style.display = '';
   }
 
-  document.getElementById('viewModalClose').addEventListener('click', closeViewModal);
-  document.getElementById('viewModal').addEventListener('click', (e) => {
-    if (e.target.id === 'viewModal') closeViewModal();
+  function setText(id, value){
+    document.getElementById(id).textContent = (value && String(value).trim()) ? value : '—';
+  }
+
+  function resultPillClass(text){
+    if (text === 'Pass' || text === 'Chấp nhận') return 'pill-soft pass';
+    if (text === 'Loại' || text === 'Từ chối') return 'pill-soft fail';
+    if (text === 'Đã tuyển') return 'pill-soft hired';
+    return 'pill-soft';
+  }
+
+  function populateDetailView(a){
+    const statusText = a.trangThai || 'Chưa xử lý';
+    const pill = document.getElementById('detailStatusPill');
+    pill.textContent = statusText;
+    pill.className = 'status-pill ' + statusClass(a.trangThai);
+
+    document.getElementById('detailMaCV').textContent = a.maCV;
+
+    setText('detailKhoi', a.khoi);
+    setText('detailPhongBan', a.phongBan);
+    setText('detailViTri', a.viTri);
+
+    setText('detailHoTen', a.hoTen);
+    setText('detailNgaySinh', a.ngaySinh);
+    setText('detailGioiTinh', a.gioiTinh);
+    setText('detailEmail', a.email);
+    setText('detailSdt', a.soDienThoai);
+    setText('detailDiaChi', a.diaChi);
+    setText('detailDiaDiem', a.diaDiem);
+    setText('detailKinhNghiem', a.kinhNghiem);
+
+    // --- Quá trình ứng tuyển: suy ra từ Trạng thái hiện có (chưa có dữ liệu lịch phỏng vấn/đánh giá/offer riêng) ---
+    setText('stageCvDate', formatDateDisplay(a.thoiGianGui));
+    const cvFileEl = document.getElementById('stageCvFile');
+    cvFileEl.innerHTML = a.cvUrl
+      ? `<a class="cv-link" href="${a.cvUrl}" target="_blank" rel="noopener">Xem CV ↗</a>`
+      : 'Chưa có';
+
+    const t = String(a.trangThai || '').trim();
+
+    let cvResult = 'Chưa có';
+    if (t === 'CV - Loại') cvResult = 'Loại';
+    else if (hasPassedCV(t)) cvResult = 'Pass';
+    document.getElementById('stageCvResult').textContent = cvResult;
+    document.getElementById('stageCvResult').className = resultPillClass(cvResult);
+
+    let pvResult = 'Chưa có';
+    if (t === 'PV - Pass') pvResult = 'Pass';
+    else if (t === 'PV - Loại') pvResult = 'Loại';
+    else if (t === 'Từ chối PV') pvResult = 'Từ chối';
+    else if (t === 'Từ chối Offer' || t === 'Đã tuyển') pvResult = 'Pass'; // đã qua phỏng vấn mới tới được bước này
+    document.getElementById('stagePvResult').textContent = pvResult;
+    document.getElementById('stagePvResult').className = resultPillClass(pvResult);
+
+    let offerResult = 'Chưa có';
+    if (t === 'Từ chối Offer') offerResult = 'Từ chối';
+    else if (t === 'Đã tuyển') offerResult = 'Đã tuyển';
+    document.getElementById('stageOfferResult').textContent = offerResult;
+    document.getElementById('stageOfferResult').className = resultPillClass(offerResult);
+  }
+
+  document.getElementById('detailBackBtn').addEventListener('click', showListView);
+  document.getElementById('detailEditBtn').addEventListener('click', () => showToast('Chức năng chỉnh sửa đang được phát triển.'));
+  document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
+    if (!CURRENT_DETAIL_CODE) return;
+    await deleteApplicants([CURRENT_DETAIL_CODE]);
+    showListView();
   });
 
   // ============================================================
