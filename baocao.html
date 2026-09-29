@@ -670,6 +670,76 @@
   .edit-mode input:focus, .edit-mode select:focus{border-color:var(--orange);background:var(--white);}
   .edit-mode input[type="file"]{font-size:12.5px;max-width:220px;}
   .edit-file-current{margin-top:4px;font-size:12px;}
+  .interview-actions{
+    display:flex;
+    align-items:flex-end;
+    gap:20px;
+    flex-wrap:wrap;
+    padding:0 20px 16px;
+  }
+  .interview-actions .detail-field input{min-width:220px;}
+  .interview-action-buttons{display:flex;gap:10px;}
+  .interview-btn{
+    border:1.5px solid var(--blue);
+    background:var(--white);
+    color:var(--blue);
+    font-weight:700;
+    font-size:13px;
+    padding:9px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .interview-btn:hover{background:var(--blue-tint);}
+
+  .modal-footer{
+    padding:14px 22px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+  }
+  #messageModal .modal-card, #emailModal .modal-card{max-width:640px;}
+  #messagePreview{
+    width:100%;
+    min-height:260px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    line-height:1.6;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    background:var(--cream);
+    resize:vertical;
+  }
+  .email-field{margin-bottom:14px;}
+  .email-field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--blue);
+    margin-bottom:5px;
+  }
+  .email-field select, .email-field input[type="email"]{
+    width:100%;
+    font-size:13.5px;
+    padding:9px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:var(--cream);
+  }
+  .email-preview-box{
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    background:var(--cream);
+    max-height:220px;
+    overflow:auto;
+    font-size:13px;
+    line-height:1.6;
+    white-space:pre-wrap;
+  }
+
   .stage-edit-actions{
     display:flex;
     justify-content:flex-end;
@@ -961,6 +1031,19 @@
               <option value="Đang chờ kết quả">Đang chờ kết quả</option>
             </select>
           </div>
+
+          <div class="detail-field"><label>Thời gian phản hồi</label><div class="val" id="viewThoiGianPhanHoi">—</div></div>
+        </div>
+
+        <div class="interview-actions edit-mode" style="display:none">
+          <div class="detail-field">
+            <label>Thời gian xác nhận (hạn phản hồi)</label>
+            <input type="text" id="editThoiGianXacNhan" placeholder="Vd: 17h00 ngày 01/10/2026">
+          </div>
+          <div class="interview-action-buttons">
+            <button type="button" class="interview-btn" id="btnSendMessage">📩 Gửi tin nhắn</button>
+            <button type="button" class="interview-btn" id="btnSendEmail">📧 Gửi email</button>
+          </div>
         </div>
       </div>
 
@@ -1011,6 +1094,59 @@
     </div>
   </div>
 
+</div>
+
+<!-- Gửi tin nhắn -->
+<div class="modal-overlay" id="messageModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h4>Gửi tin nhắn mời phỏng vấn</h4>
+      <button class="modal-close" id="messageModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-soft)">Sao chép nội dung bên dưới để gửi cho ứng viên qua tin nhắn/Zalo:</p>
+      <textarea id="messagePreview" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="detail-edit-btn" id="messageModalCancel">Đóng</button>
+      <button type="button" class="detail-save-btn" id="messageCopyBtn">📋 Sao chép nội dung</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gửi email -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h4>Gửi email mời phỏng vấn</h4>
+      <button class="modal-close" id="emailModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="email-field">
+        <label>Email người gửi</label>
+        <select id="emailFrom">
+          <option value="thecakelab.recruitment@gmail.com">thecakelab.recruitment@gmail.com</option>
+          <option value="thecakelab.hr@gmail.com">thecakelab.hr@gmail.com</option>
+        </select>
+      </div>
+      <div class="email-field">
+        <label>Email người nhận</label>
+        <input type="email" id="emailTo" placeholder="email@ungvien.com">
+      </div>
+      <div class="email-field">
+        <label>Tiêu đề</label>
+        <div class="email-preview-box" id="emailSubjectPreview" style="max-height:none"></div>
+      </div>
+      <div class="email-field">
+        <label>Nội dung</label>
+        <div class="email-preview-box" id="emailBodyPreview"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="detail-edit-btn" id="emailModalCancel">Hủy</button>
+      <button type="button" class="detail-save-btn" id="emailSendBtn">📧 Gửi email</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1585,6 +1721,7 @@
     setText('viewNgayPV', formatDateDisplay(a.ngayPV) !== '—' ? formatDateDisplay(a.ngayPV) : a.ngayPV);
     setText('viewDiaDiemPV', a.diaDiemPV);
     setText('viewNguoiPV', a.nguoiPV);
+    setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
     let pvResult = a.ketQuaPV || (t === 'Từ chối PV' || t === 'PV - Loại' ? t : ((t === 'Từ chối Offer' || t === 'Đã tuyển') ? 'PV - Pass' : ''));
     setPill('stagePvResult', pvResult);
 
@@ -1665,6 +1802,7 @@
     document.getElementById('editDiaDiemPV').value = a.diaDiemPV || '';
     document.getElementById('editNguoiPV').value = a.nguoiPV || '';
     document.getElementById('editKetQuaPV').value = a.ketQuaPV || '';
+    document.getElementById('editThoiGianXacNhan').value = '';
     document.getElementById('editNgayOffer').value = a.ngayOffer || '';
     document.getElementById('editKetQuaOffer').value = a.ketQuaOffer || '';
     document.getElementById('editDanhGiaFile').value = '';
@@ -1762,6 +1900,168 @@
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = '💾 Lưu thay đổi';
+    }
+  });
+
+  // ============================================================
+  // MẪU GỬI PHỎNG VẤN — Gửi tin nhắn / Gửi email
+  // ============================================================
+  let INTERVIEW_TEMPLATES = null;
+
+  async function getInterviewTemplates(){
+    if (INTERVIEW_TEMPLATES) return INTERVIEW_TEMPLATES;
+    const res = await fetch(APPS_SCRIPT_URL + '?action=interviewTemplates');
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Không tải được mẫu gửi phỏng vấn');
+    INTERVIEW_TEMPLATES = json;
+    return json;
+  }
+
+  // Thay các placeholder dạng [Tên ứng viên] bằng dữ liệu ứng viên + thông tin phỏng vấn đang nhập.
+  function fillInterviewTemplate(text, ctx){
+    return String(text || '')
+      .replace(/\[Tên ứng viên\]/g, ctx.hoTen || '')
+      .replace(/\[Vị trí tuyển dụng\]/g, ctx.viTri || '')
+      .replace(/\[Giờ\]/g, ctx.gio || '')
+      .replace(/\[Ngày phỏng vấn\]/g, ctx.ngay || '')
+      .replace(/\[Địa điểm phỏng vấn\]/g, ctx.diaDiem || '')
+      .replace(/\[Thời gian xác nhận\]/g, ctx.hanXacNhan || '');
+  }
+
+  function getInterviewContext(){
+    const a = findCurrentApplicant();
+    return {
+      hoTen: a ? a.hoTen : '',
+      viTri: a ? a.viTri : '',
+      gio: document.getElementById('editGioPV').value,
+      ngay: formatDateDisplay(document.getElementById('editNgayPV').value),
+      diaDiem: document.getElementById('editDiaDiemPV').value.trim(),
+      hanXacNhan: document.getElementById('editThoiGianXacNhan').value.trim()
+    };
+  }
+
+  function validateInterviewContext(ctx){
+    if (!ctx.gio || !ctx.ngay || ctx.ngay === '—' || !ctx.diaDiem){
+      showToast('Vui lòng nhập Giờ, Ngày và Địa điểm phỏng vấn trước.');
+      return false;
+    }
+    if (!ctx.hanXacNhan){
+      showToast('Vui lòng nhập "Thời gian xác nhận" (hạn phản hồi) trước.');
+      return false;
+    }
+    return true;
+  }
+
+  // --- Gửi tin nhắn ---
+  document.getElementById('btnSendMessage').addEventListener('click', async () => {
+    const ctx = getInterviewContext();
+    if (!validateInterviewContext(ctx)) return;
+
+    try {
+      const tpl = await getInterviewTemplates();
+      const content = fillInterviewTemplate(tpl.message, ctx);
+      document.getElementById('messagePreview').value = content;
+      document.getElementById('messageModal').classList.add('open');
+    } catch (err){
+      showToast('Lỗi: ' + err.message);
+    }
+  });
+
+  document.getElementById('messageModalClose').addEventListener('click', () => document.getElementById('messageModal').classList.remove('open'));
+  document.getElementById('messageModalCancel').addEventListener('click', () => document.getElementById('messageModal').classList.remove('open'));
+  document.getElementById('messageModal').addEventListener('click', (e) => { if (e.target.id === 'messageModal') e.currentTarget.classList.remove('open'); });
+
+  document.getElementById('messageCopyBtn').addEventListener('click', async () => {
+    const textarea = document.getElementById('messagePreview');
+    try {
+      await navigator.clipboard.writeText(textarea.value);
+    } catch (err){
+      textarea.select();
+      document.execCommand('copy');
+    }
+    showToast('Đã sao chép nội dung tin nhắn.');
+
+    const a = findCurrentApplicant();
+    if (!a) return;
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'markMessageCopied', maCV: a.maCV })
+      });
+      const json = await res.json();
+      if (json.success){
+        a.thoiGianPhanHoi = json.thoiGianPhanHoi;
+        setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
+      }
+    } catch (err){ /* không chặn UI nếu ghi log thất bại */ }
+  });
+
+  // --- Gửi email ---
+  document.getElementById('btnSendEmail').addEventListener('click', async () => {
+    const ctx = getInterviewContext();
+    if (!validateInterviewContext(ctx)) return;
+
+    const a = findCurrentApplicant();
+    if (!a) return;
+
+    try {
+      const tpl = await getInterviewTemplates();
+      const subject = fillInterviewTemplate(tpl.emailSubject, ctx);
+      const body = fillInterviewTemplate(tpl.emailBody, ctx) + '\n\n' + (tpl.signature || '');
+
+      document.getElementById('emailTo').value = a.email || '';
+      document.getElementById('emailSubjectPreview').textContent = subject;
+      document.getElementById('emailBodyPreview').textContent = body;
+      document.getElementById('emailModal').dataset.subject = subject;
+      document.getElementById('emailModal').dataset.body = body;
+      document.getElementById('emailModal').classList.add('open');
+    } catch (err){
+      showToast('Lỗi: ' + err.message);
+    }
+  });
+
+  document.getElementById('emailModalClose').addEventListener('click', () => document.getElementById('emailModal').classList.remove('open'));
+  document.getElementById('emailModalCancel').addEventListener('click', () => document.getElementById('emailModal').classList.remove('open'));
+  document.getElementById('emailModal').addEventListener('click', (e) => { if (e.target.id === 'emailModal') e.currentTarget.classList.remove('open'); });
+
+  document.getElementById('emailSendBtn').addEventListener('click', async () => {
+    const a = findCurrentApplicant();
+    if (!a) return;
+
+    const toEmail = document.getElementById('emailTo').value.trim();
+    if (!toEmail){ showToast('Vui lòng nhập email người nhận.'); return; }
+
+    const sendBtn = document.getElementById('emailSendBtn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Đang gửi...';
+
+    try {
+      const modal = document.getElementById('emailModal');
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'sendInterviewEmail',
+          maCV: a.maCV,
+          fromEmail: document.getElementById('emailFrom').value,
+          toEmail: toEmail,
+          subject: modal.dataset.subject,
+          body: modal.dataset.body
+        })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gửi email thất bại');
+
+      a.thoiGianPhanHoi = json.thoiGianPhanHoi;
+      setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
+      document.getElementById('emailModal').classList.remove('open');
+      showToast('Đã gửi email mời phỏng vấn.');
+    } catch (err){
+      showToast('Lỗi khi gửi email: ' + err.message);
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = '📧 Gửi email';
     }
   });
 
