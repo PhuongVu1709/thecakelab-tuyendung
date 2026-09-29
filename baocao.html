@@ -402,11 +402,15 @@
     border:1px solid var(--line);
     overflow:auto;
     box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
+    max-height:calc(100vh - 320px);
   }
   table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:1100px;table-layout:fixed;}
   th, td{overflow:hidden;text-overflow:ellipsis;}
   td.ten-uv, td.ma-cv{white-space:normal;word-break:break-word;}
   thead th{
+    position:sticky;
+    top:0;
+    z-index:5;
     text-align:left;
     font-size:11.5px;
     font-weight:700;
@@ -416,6 +420,7 @@
     background:var(--cream);
     padding:14px 16px;
     border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 var(--line);
     white-space:nowrap;
   }
   tbody td{
@@ -650,19 +655,21 @@
       <table>
         <colgroup>
           <col style="width:40px">
-          <col style="width:8%">
-          <col style="width:12%">
-          <col style="width:14%">
-          <col style="width:15%">
-          <col style="width:15%">
-          <col style="width:11%">
-          <col style="width:8%">
+          <col style="width:7%">
           <col style="width:9%">
+          <col style="width:11%">
+          <col style="width:13%">
+          <col style="width:13%">
+          <col style="width:13%">
+          <col style="width:10%">
+          <col style="width:7%">
+          <col style="width:8%">
         </colgroup>
         <thead>
           <tr>
             <th><input type="checkbox" id="checkAll"></th>
             <th>Mã CV</th>
+            <th>Ngày ứng tuyển</th>
             <th>Khối</th>
             <th>Phòng ban</th>
             <th>Vị trí công việc</th>
@@ -673,7 +680,7 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr class="empty-row"><td colspan="9">Đang tải dữ liệu…</td></tr>
+          <tr class="empty-row"><td colspan="10">Đang tải dữ liệu…</td></tr>
         </tbody>
       </table>
     </div>
@@ -755,14 +762,14 @@
   let ALL_APPLICANTS = [];
 
   const FALLBACK_APPLICANTS = [
-    { maCV:'CV001', hoTen:'Nguyễn Thị Hồng', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV002', hoTen:'Trần Minh Quang', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV003', hoTen:'Lê Thị Thu', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'PV - Pass', cvUrl:'' },
-    { maCV:'CV004', hoTen:'Phạm Hoàng Anh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV005', hoTen:'Đặng Ngọc Linh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Loại', cvUrl:'' },
-    { maCV:'CV006', hoTen:'Vũ Đình Tuấn', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV007', hoTen:'Bùi Thị Lan', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
-    { maCV:'CV008', hoTen:'Hoàng Văn Hải', khoi:'Khối sản xuất', phongBan:'Tổ bánh lạnh - sinh nhật', viTri:'Thợ bánh lạnh', trangThai:'Đã tuyển', cvUrl:'' }
+    { maCV:'CV001', thoiGianGui:'2026-09-01', hoTen:'Nguyễn Thị Hồng', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV002', thoiGianGui:'2026-09-02', hoTen:'Trần Minh Quang', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV003', thoiGianGui:'2026-09-03', hoTen:'Lê Thị Thu', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'PV - Pass', cvUrl:'' },
+    { maCV:'CV004', thoiGianGui:'2026-09-05', hoTen:'Phạm Hoàng Anh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV005', thoiGianGui:'2026-09-06', hoTen:'Đặng Ngọc Linh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Loại', cvUrl:'' },
+    { maCV:'CV006', thoiGianGui:'2026-09-10', hoTen:'Vũ Đình Tuấn', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV007', thoiGianGui:'2026-09-12', hoTen:'Bùi Thị Lan', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV008', thoiGianGui:'2026-09-15', hoTen:'Hoàng Văn Hải', khoi:'Khối sản xuất', phongBan:'Tổ bánh lạnh - sinh nhật', viTri:'Thợ bánh lạnh', trangThai:'Đã tuyển', cvUrl:'' }
   ];
 
   async function loadApplicants(){
@@ -895,6 +902,13 @@
     }[s]));
   }
 
+  function formatDateDisplay(isoDate){
+    if (!isoDate) return '—';
+    const [y, m, d] = String(isoDate).slice(0,10).split('-');
+    if (!y || !m || !d) return '—';
+    return `${d}/${m}/${y}`;
+  }
+
   const STATUS_OPTIONS = [
     'CV - Loại', 'CV - Pass', 'Từ chối PV', 'PV - Loại',
     'PV - Pass', 'Từ chối Offer', 'Đã tuyển', 'Đang chờ kết quả'
@@ -971,7 +985,7 @@
     body.innerHTML = '';
 
     if (list.length === 0){
-      body.innerHTML = '<tr class="empty-row"><td colspan="9">Không tìm thấy ứng viên phù hợp.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="10">Không tìm thấy ứng viên phù hợp.</td></tr>';
       return;
     }
 
@@ -985,6 +999,7 @@
       tr.innerHTML = `
         <td><input type="checkbox" data-macv="${escapeHtml(a.maCV)}" ${SELECTED_CODES.has(a.maCV) ? 'checked' : ''}></td>
         <td class="ma-cv">${escapeHtml(a.maCV)}</td>
+        <td>${escapeHtml(formatDateDisplay(a.thoiGianGui))}</td>
         <td>${escapeHtml(a.khoi)}</td>
         <td>${escapeHtml(a.phongBan)}</td>
         <td>${escapeHtml(a.viTri)}</td>
@@ -1097,7 +1112,7 @@
   // TIỆN ÍCH — XUẤT / NHẬP DỮ LIỆU (Excel)
   // ============================================================
   const EXPORT_COLUMNS = [
-    ['Mã CV', 'maCV'], ['Họ và Tên', 'hoTen'], ['Ngày sinh', 'ngaySinh'],
+    ['Mã CV', 'maCV'], ['Thời gian gửi', 'thoiGianGui'], ['Họ và Tên', 'hoTen'], ['Ngày sinh', 'ngaySinh'],
     ['Giới tính', 'gioiTinh'], ['Email', 'email'], ['Số điện thoại', 'soDienThoai'],
     ['Địa chỉ', 'diaChi'], ['Vị trí ứng tuyển', 'viTri'], ['Địa điểm', 'diaDiem'],
     ['Mô tả kinh nghiệm', 'kinhNghiem'], ['CV', 'cvUrl'],
@@ -1182,6 +1197,7 @@
   function openViewModal(a){
     document.getElementById('viewModalTitle').textContent = a.hoTen + ' — ' + a.maCV;
     const rows = [
+      ['Ngày ứng tuyển', formatDateDisplay(a.thoiGianGui) !== '—' ? formatDateDisplay(a.thoiGianGui) : ''],
       ['Vị trí ứng tuyển', a.viTri],
       ['Khối / Phòng ban', [a.khoi, a.phongBan].filter(Boolean).join(' / ')],
       ['Trạng thái', a.trangThai || 'Chưa xử lý'],
