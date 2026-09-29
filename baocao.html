@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cake Lab | Báo cáo tuyển dụng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#F37021;
+    --orange-dark:#D95E14;
+    --orange-tint:#FCE3CC;
+    --blue:#032C7D;
+    --blue-tint:#E4E9F5;
+    --cream:#FCF6ED;
+    --ink:#1C1710;
+    --ink-soft:#6B655C;
+    --white:#FFFFFF;
+    --line:rgba(3,44,125,0.12);
+    --shadow: 0 18px 40px -22px rgba(3,44,125,0.35);
+    --green:#1E8E5A;
+    --green-tint:#E1F3EA;
+    --red:#C0362C;
+    --red-tint:#FBEAE8;
+    --yellow-tint:#FDF3D9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Be Vietnam Pro',sans-serif;}
+  button{font-family:inherit;}
+
+  /* ============ LOGIN SCREEN ============ */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    width:100%;
+    max-width:380px;
+    background:var(--white);
+    border-radius:22px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    padding:36px 32px;
+  }
+  .login-logo{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:0.14em;
+    padding:10px 18px;
+    border-radius:999px;
+    text-transform:uppercase;
+    margin-bottom:22px;
+  }
+  .login-card h2{
+    margin:0 0 6px;
+    font-size:20px;
+    color:var(--blue);
+  }
+  .login-card p{
+    margin:0 0 24px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .login-field{margin-bottom:16px;}
+  .login-field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:var(--blue);
+    margin-bottom:6px;
+  }
+  .login-field input{
+    width:100%;
+    font-size:14.5px;
+    padding:11px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    background:var(--cream);
+    outline:none;
+  }
+  .login-field input:focus{border-color:var(--orange);background:var(--white);}
+  .login-btn{
+    width:100%;
+    border:none;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:700;
+    font-size:15px;
+    padding:13px 16px;
+    border-radius:11px;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .login-btn:hover{background:var(--orange-dark);}
+  .login-error{
+    display:none;
+    font-size:13px;
+    font-weight:600;
+    color:var(--red);
+    background:var(--red-tint);
+    padding:10px 12px;
+    border-radius:8px;
+    margin-bottom:14px;
+  }
+  .login-error.show{display:block;}
+
+  /* ============ DASHBOARD ============ */
+  #dashboard{display:none;}
+  #dashboard.show{display:block;}
+
+  .dash-page{max-width:1400px;margin:0 auto;padding:28px 24px 60px;}
+
+  .dash-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:24px;
+  }
+  .logo-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:0.14em;
+    padding:10px 18px;
+    border-radius:999px;
+    text-transform:uppercase;
+  }
+  .logout-btn{
+    border:1.5px solid var(--line);
+    background:var(--white);
+    color:var(--ink-soft);
+    font-weight:600;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+  h1.dash-title{
+    font-size:24px;
+    font-weight:800;
+    color:var(--ink);
+    margin:0 0 20px;
+  }
+
+  /* Summary cards */
+  .summary-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:16px;
+    margin-bottom:22px;
+  }
+  .summary-card{
+    background:var(--white);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:hidden;
+    box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
+  }
+  .summary-card .bar{height:5px;}
+  .summary-card .body{padding:18px 20px;}
+  .summary-card .label{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .summary-card .num{
+    font-size:34px;
+    font-weight:800;
+    color:var(--ink);
+    line-height:1;
+    margin-bottom:6px;
+  }
+  .summary-card .unit{font-size:12.5px;color:var(--ink-soft);}
+  .bar-orange{background:var(--orange);}
+  .bar-blue{background:#3B6FE0;}
+  .bar-yellow{background:#F0B429;}
+  .bar-green{background:var(--green);}
+  .bar-red{background:#D3453B;}
+  .summary-card.bg-yellow .body{background:var(--yellow-tint);}
+  .summary-card.bg-red .body{background:var(--red-tint);}
+
+  /* Filters */
+  .filter-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .filter-row input[type="text"],
+  .filter-row select,
+  .filter-row input[type="date"]{
+    font-size:13.5px;
+    padding:10px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    background:var(--white);
+    color:var(--ink);
+    outline:none;
+  }
+  .filter-row select{min-width:150px;cursor:pointer;}
+  .search-box{position:relative;flex:1;min-width:220px;max-width:280px;}
+  .search-box input{width:100%;padding-left:34px;}
+  .search-box svg{
+    position:absolute;left:11px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;color:var(--ink-soft);
+  }
+  .date-label{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+  .clear-btn{
+    border:none;background:none;cursor:pointer;
+    color:var(--ink-soft);width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:8px;
+  }
+  .clear-btn:hover{background:var(--blue-tint);color:var(--blue);}
+
+  .actions-row{display:flex;gap:12px;margin-bottom:20px;}
+  .utility-btn{
+    border:1.5px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+    font-weight:700;
+    font-size:13.5px;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .utility-btn:hover{border-color:var(--blue);}
+  .add-btn{
+    border:none;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:700;
+    font-size:13.5px;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .add-btn:hover{background:var(--orange-dark);}
+
+  /* Table */
+  .table-wrap{
+    background:var(--white);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:auto;
+    box-shadow:0 10px 22px -18px rgba(3,44,125,0.4);
+  }
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:1100px;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    background:var(--cream);
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FFFBF4;}
+  td.ma-cv{font-weight:700;color:var(--blue);}
+  td.ten-uv{font-weight:700;}
+
+  .status-pill{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .status-cv-pass{background:var(--blue-tint);color:var(--blue);}
+  .status-cv-fail{background:var(--red-tint);color:var(--red);}
+  .status-phong-van{background:var(--yellow-tint);color:#8A6100;}
+  .status-da-tuyen{background:var(--green-tint);color:var(--green);}
+  .status-tu-choi{background:var(--red-tint);color:var(--red);}
+  .status-none{background:#EEEBE4;color:var(--ink-soft);}
+
+  .cv-link{color:var(--blue);font-weight:700;text-decoration:none;}
+  .cv-link:hover{text-decoration:underline;}
+  .cv-none{color:var(--ink-soft);}
+
+  .action-icons{display:flex;gap:8px;}
+  .icon-btn{
+    width:32px;height:32px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:var(--white);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .icon-btn.view{border-color:var(--orange);color:var(--orange-dark);}
+  .icon-btn.edit:hover{border-color:var(--blue);color:var(--blue);}
+  .icon-btn.delete:hover{border-color:var(--red);color:var(--red);}
+  .icon-btn svg{width:15px;height:15px;}
+
+  .empty-row td{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+  }
+
+  .dash-banner{
+    font-size:12.5px;
+    color:var(--blue);
+    background:var(--blue-tint);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .dash-banner.show{display:block;}
+
+  /* View modal */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(20,15,8,0.55);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:100;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-card{
+    background:var(--white);width:100%;max-width:560px;max-height:86vh;
+    border-radius:18px;display:flex;flex-direction:column;overflow:hidden;
+  }
+  .modal-header{
+    padding:18px 22px;display:flex;align-items:center;justify-content:space-between;
+    background:var(--blue);color:var(--white);
+  }
+  .modal-header h4{margin:0;font-size:16px;}
+  .modal-close{
+    background:rgba(255,255,255,0.15);border:none;color:var(--white);
+    width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;
+  }
+  .modal-body{padding:22px;overflow:auto;}
+  .detail-row{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-row .k{width:150px;flex:none;font-weight:700;color:var(--blue);}
+  .detail-row .v{color:var(--ink);word-break:break-word;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:var(--white);
+    padding:12px 20px;border-radius:10px;font-size:13.5px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+    z-index:200;
+  }
+  .toast.show{opacity:1;}
+
+  @media (max-width:1100px){
+    .summary-row{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .summary-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <form class="login-card" id="loginForm" novalidate>
+    <span class="login-logo">The Cake Lab</span>
+    <h2>Báo cáo tuyển dụng</h2>
+    <p>Đăng nhập để xem báo cáo ứng viên nội bộ.</p>
+
+    <div class="login-error" id="loginError">Sai tên đăng nhập hoặc mật khẩu.</div>
+
+    <div class="login-field">
+      <label for="loginUser">Tên đăng nhập</label>
+      <input type="text" id="loginUser" autocomplete="username" required>
+    </div>
+    <div class="login-field">
+      <label for="loginPass">Mật khẩu</label>
+      <input type="password" id="loginPass" autocomplete="current-password" required>
+    </div>
+
+    <button type="submit" class="login-btn">Đăng nhập</button>
+  </form>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <div class="dash-page">
+
+    <div class="dash-topbar">
+      <span class="logo-pill">The Cake Lab</span>
+      <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+    </div>
+
+    <h1 class="dash-title">Báo cáo tuyển dụng</h1>
+
+    <div id="dashBanner" class="dash-banner"></div>
+
+    <div class="summary-row">
+      <div class="summary-card"><div class="bar bar-orange"></div>
+        <div class="body">
+          <div class="label">Tổng ứng viên</div>
+          <div class="num" id="stTotal">0</div>
+          <div class="unit">hồ sơ</div>
+        </div>
+      </div>
+      <div class="summary-card"><div class="bar bar-blue"></div>
+        <div class="body">
+          <div class="label">Pass CV</div>
+          <div class="num" id="stPass">0</div>
+          <div class="unit">ứng viên</div>
+        </div>
+      </div>
+      <div class="summary-card bg-yellow"><div class="bar bar-yellow"></div>
+        <div class="body">
+          <div class="label">Phỏng vấn</div>
+          <div class="num" id="stInterview">0</div>
+          <div class="unit">ứng viên</div>
+        </div>
+      </div>
+      <div class="summary-card"><div class="bar bar-green"></div>
+        <div class="body">
+          <div class="label">Đã tuyển</div>
+          <div class="num" id="stHired">0</div>
+          <div class="unit">ứng viên</div>
+        </div>
+      </div>
+      <div class="summary-card bg-red"><div class="bar bar-red"></div>
+        <div class="body">
+          <div class="label">Từ chối</div>
+          <div class="num" id="stRejected">0</div>
+          <div class="unit">ứng viên</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+        <input type="text" id="fSearch" placeholder="Tìm ứng viên...">
+      </div>
+      <select id="fKhoi"><option value="">Tất cả khối</option></select>
+      <select id="fPhongBan"><option value="">Tất cả phòng ban</option></select>
+      <select id="fViTri"><option value="">Tất cả vị trí</option></select>
+      <select id="fTrangThai"><option value="">Tất cả trạng thái</option></select>
+      <span class="date-label">Nộp CV từ</span>
+      <input type="date" id="fFrom">
+      <span class="date-label">đến</span>
+      <input type="date" id="fTo">
+      <button class="clear-btn" id="fClear" title="Xoá bộ lọc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="actions-row">
+      <button class="utility-btn" id="utilityBtn">⚙ Tiện ích</button>
+      <button class="add-btn" id="addBtn">+ Thêm ứng viên</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="checkAll"></th>
+            <th>Mã CV</th>
+            <th>Khối</th>
+            <th>Phòng ban</th>
+            <th>Vị trí công việc</th>
+            <th>Tên ứng viên</th>
+            <th>Trạng thái</th>
+            <th>CV đính kèm</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row"><td colspan="9">Đang tải dữ liệu…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Xem chi tiết ứng viên -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h4 id="viewModalTitle">Chi tiết ứng viên</h4>
+      <button class="modal-close" id="viewModalClose">✕</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // CẤU HÌNH — cùng 1 URL Apps Script Web App với index.html
+  // ============================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAeTLPEw3sICLXieX_fdFNiPlEU_tXhA834ax9xb_ccZWmVKSoEiIJo9JgSQiRDO5B2w/exec';
+
+  const LOGIN_USER = 'Hrthecakelab';
+  const LOGIN_PASS = 'Tdtcl@2708';
+  const SESSION_KEY = 'tcl_baocao_logged_in';
+
+  // ============================================================
+  // ĐĂNG NHẬP
+  // ============================================================
+  function showDashboard(){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('show');
+    loadApplicants();
+  }
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1'){
+    showDashboard();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errorBox = document.getElementById('loginError');
+
+    if (user === LOGIN_USER && pass === LOGIN_PASS){
+      sessionStorage.setItem(SESSION_KEY, '1');
+      errorBox.classList.remove('show');
+      showDashboard();
+    } else {
+      errorBox.classList.add('show');
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    document.getElementById('dashboard').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginForm').reset();
+  });
+
+  // ============================================================
+  // DỮ LIỆU ỨNG VIÊN
+  // ============================================================
+  let ALL_APPLICANTS = [];
+
+  const FALLBACK_APPLICANTS = [
+    { maCV:'CV001', hoTen:'Nguyễn Thị Hồng', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV002', hoTen:'Trần Minh Quang', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV003', hoTen:'Lê Thị Thu', khoi:'Khối kinh doanh', phongBan:'Bộ phận kinh doanh bán lẻ', viTri:'Nhân viên bán hàng', trangThai:'Phỏng vấn - Pass', cvUrl:'' },
+    { maCV:'CV004', hoTen:'Phạm Hoàng Anh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV005', hoTen:'Đặng Ngọc Linh', khoi:'Khối kinh doanh', phongBan:'Bộ phận Marketing', viTri:'Nhân viên Marketing', trangThai:'CV - Fail', cvUrl:'' },
+    { maCV:'CV006', hoTen:'Vũ Đình Tuấn', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV007', hoTen:'Bùi Thị Lan', khoi:'Khối sản xuất', phongBan:'Tổ bánh nóng', viTri:'Thợ bánh', trangThai:'CV - Pass', cvUrl:'' },
+    { maCV:'CV008', hoTen:'Hoàng Văn Hải', khoi:'Khối sản xuất', phongBan:'Tổ bánh lạnh - sinh nhật', viTri:'Thợ bánh lạnh', trangThai:'Đã tuyển', cvUrl:'' }
+  ];
+
+  async function loadApplicants(){
+    const banner = document.getElementById('dashBanner');
+    banner.classList.remove('show');
+
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('REPLACE_WITH')){
+      banner.textContent = 'Chưa gắn Apps Script URL — đang hiển thị dữ liệu mẫu.';
+      banner.classList.add('show');
+      ALL_APPLICANTS = FALLBACK_APPLICANTS;
+      renderAll();
+      return;
+    }
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL + '?action=applicants');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Unknown error');
+      ALL_APPLICANTS = json.data || [];
+      renderAll();
+    } catch (err){
+      banner.textContent = 'Không tải được dữ liệu trực tiếp (' + err.message + ') — đang hiển thị dữ liệu mẫu.';
+      banner.classList.add('show');
+      ALL_APPLICANTS = FALLBACK_APPLICANTS;
+      renderAll();
+    }
+  }
+
+  function renderAll(){
+    populateFilterOptions();
+    applyFiltersAndRender();
+  }
+
+  function uniqueSorted(list){
+    return [...new Set(list.filter(Boolean))].sort((a,b) => a.localeCompare(b, 'vi'));
+  }
+
+  function populateFilterOptions(){
+    const khoiSel = document.getElementById('fKhoi');
+    const phongBanSel = document.getElementById('fPhongBan');
+    const viTriSel = document.getElementById('fViTri');
+    const trangThaiSel = document.getElementById('fTrangThai');
+
+    const keepValue = (sel) => sel.value;
+    const khoiVal = keepValue(khoiSel), pbVal = keepValue(phongBanSel), vtVal = keepValue(viTriSel), ttVal = keepValue(trangThaiSel);
+
+    khoiSel.innerHTML = '<option value="">Tất cả khối</option>' +
+      uniqueSorted(ALL_APPLICANTS.map(a => a.khoi)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    phongBanSel.innerHTML = '<option value="">Tất cả phòng ban</option>' +
+      uniqueSorted(ALL_APPLICANTS.map(a => a.phongBan)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    viTriSel.innerHTML = '<option value="">Tất cả vị trí</option>' +
+      uniqueSorted(ALL_APPLICANTS.map(a => a.viTri)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    trangThaiSel.innerHTML = '<option value="">Tất cả trạng thái</option>' +
+      uniqueSorted(ALL_APPLICANTS.map(a => a.trangThai)).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+
+    if (khoiVal) khoiSel.value = khoiVal;
+    if (pbVal) phongBanSel.value = pbVal;
+    if (vtVal) viTriSel.value = vtVal;
+    if (ttVal) trangThaiSel.value = ttVal;
+  }
+
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, s => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[s]));
+  }
+
+  function statusClass(trangThai){
+    const t = String(trangThai || '').toLowerCase();
+    if (!t) return 'status-none';
+    if (t.includes('fail')) return 'status-cv-fail';
+    if (t.includes('từ chối')) return 'status-tu-choi';
+    if (t.includes('đã tuyển')) return 'status-da-tuyen';
+    if (t.includes('phỏng vấn')) return 'status-phong-van';
+    if (t.includes('pass')) return 'status-cv-pass';
+    return 'status-none';
+  }
+
+  function bucketOf(trangThai){
+    const t = String(trangThai || '').toLowerCase();
+    if (t.includes('fail') || t.includes('từ chối')) return 'rejected';
+    if (t.includes('đã tuyển')) return 'hired';
+    if (t.includes('phỏng vấn')) return 'interview';
+    if (t.includes('pass')) return 'pass';
+    return 'none';
+  }
+
+  function applyFiltersAndRender(){
+    const search = document.getElementById('fSearch').value.trim().toLowerCase();
+    const khoi = document.getElementById('fKhoi').value;
+    const phongBan = document.getElementById('fPhongBan').value;
+    const viTri = document.getElementById('fViTri').value;
+    const trangThai = document.getElementById('fTrangThai').value;
+    const from = document.getElementById('fFrom').value;
+    const to = document.getElementById('fTo').value;
+
+    const filtered = ALL_APPLICANTS.filter(a => {
+      if (search){
+        const hay = (a.maCV + ' ' + a.hoTen).toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      if (khoi && a.khoi !== khoi) return false;
+      if (phongBan && a.phongBan !== phongBan) return false;
+      if (viTri && a.viTri !== viTri) return false;
+      if (trangThai && a.trangThai !== trangThai) return false;
+      if ((from || to) && a.thoiGianGui){
+        const d = a.thoiGianGui.slice(0,10);
+        if (from && d < from) return false;
+        if (to && d > to) return false;
+      }
+      return true;
+    });
+
+    renderSummary(filtered);
+    renderTable(filtered);
+  }
+
+  function renderSummary(list){
+    document.getElementById('stTotal').textContent = list.length;
+    document.getElementById('stPass').textContent = list.filter(a => bucketOf(a.trangThai) === 'pass').length;
+    document.getElementById('stInterview').textContent = list.filter(a => bucketOf(a.trangThai) === 'interview').length;
+    document.getElementById('stHired').textContent = list.filter(a => bucketOf(a.trangThai) === 'hired').length;
+    document.getElementById('stRejected').textContent = list.filter(a => bucketOf(a.trangThai) === 'rejected').length;
+  }
+
+  function renderTable(list){
+    const body = document.getElementById('tableBody');
+    body.innerHTML = '';
+
+    if (list.length === 0){
+      body.innerHTML = '<tr class="empty-row"><td colspan="9">Không tìm thấy ứng viên phù hợp.</td></tr>';
+      return;
+    }
+
+    list.forEach(a => {
+      const tr = document.createElement('tr');
+      const cvCell = a.cvUrl
+        ? `<a class="cv-link" href="${a.cvUrl}" target="_blank" rel="noopener">Xem CV</a>`
+        : `<span class="cv-none">Chưa có</span>`;
+      const statusText = a.trangThai || 'Chưa xử lý';
+
+      tr.innerHTML = `
+        <td><input type="checkbox"></td>
+        <td class="ma-cv">${escapeHtml(a.maCV)}</td>
+        <td>${escapeHtml(a.khoi)}</td>
+        <td>${escapeHtml(a.phongBan)}</td>
+        <td>${escapeHtml(a.viTri)}</td>
+        <td class="ten-uv">${escapeHtml(a.hoTen)}</td>
+        <td><span class="status-pill ${statusClass(a.trangThai)}">${escapeHtml(statusText)}</span></td>
+        <td>${cvCell}</td>
+        <td>
+          <div class="action-icons">
+            <button class="icon-btn view" title="Xem chi tiết" data-action="view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="icon-btn edit" title="Sửa (đang phát triển)" data-action="edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button class="icon-btn delete" title="Xoá (đang phát triển)" data-action="delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tr.querySelector('[data-action="view"]').addEventListener('click', () => openViewModal(a));
+      tr.querySelector('[data-action="edit"]').addEventListener('click', () => showToast('Chức năng chỉnh sửa đang được phát triển.'));
+      tr.querySelector('[data-action="delete"]').addEventListener('click', () => showToast('Chức năng xoá đang được phát triển.'));
+
+      body.appendChild(tr);
+    });
+  }
+
+  // Bộ lọc — gắn sự kiện
+  ['fSearch'].forEach(id => document.getElementById(id).addEventListener('input', applyFiltersAndRender));
+  ['fKhoi','fPhongBan','fViTri','fTrangThai','fFrom','fTo'].forEach(id =>
+    document.getElementById(id).addEventListener('change', applyFiltersAndRender)
+  );
+  document.getElementById('fClear').addEventListener('click', () => {
+    document.getElementById('fSearch').value = '';
+    document.getElementById('fKhoi').value = '';
+    document.getElementById('fPhongBan').value = '';
+    document.getElementById('fViTri').value = '';
+    document.getElementById('fTrangThai').value = '';
+    document.getElementById('fFrom').value = '';
+    document.getElementById('fTo').value = '';
+    applyFiltersAndRender();
+  });
+
+  document.getElementById('checkAll').addEventListener('change', (e) => {
+    document.querySelectorAll('#tableBody input[type="checkbox"]').forEach(cb => cb.checked = e.target.checked);
+  });
+
+  document.getElementById('utilityBtn').addEventListener('click', () => showToast('Các tiện ích (xuất Excel, gửi email hàng loạt...) sẽ được phát triển tiếp.'));
+  document.getElementById('addBtn').addEventListener('click', () => showToast('Chức năng thêm ứng viên thủ công đang được phát triển.'));
+
+  // ============================================================
+  // MODAL XEM CHI TIẾT
+  // ============================================================
+  function openViewModal(a){
+    document.getElementById('viewModalTitle').textContent = a.hoTen + ' — ' + a.maCV;
+    const rows = [
+      ['Vị trí ứng tuyển', a.viTri],
+      ['Khối / Phòng ban', [a.khoi, a.phongBan].filter(Boolean).join(' / ')],
+      ['Trạng thái', a.trangThai || 'Chưa xử lý'],
+      ['Ngày sinh', a.ngaySinh],
+      ['Giới tính', a.gioiTinh],
+      ['Email', a.email],
+      ['Số điện thoại', a.soDienThoai],
+      ['Địa chỉ', a.diaChi],
+      ['Địa điểm làm việc', a.diaDiem],
+      ['Kinh nghiệm', a.kinhNghiem],
+      ['Câu hỏi khác', a.cauHoiKhac],
+      ['CV', a.cvUrl ? `<a class="cv-link" href="${a.cvUrl}" target="_blank" rel="noopener">Mở CV ↗</a>` : 'Chưa có']
+    ];
+
+    const body = document.getElementById('viewModalBody');
+    body.innerHTML = rows
+      .filter(([, v]) => v)
+      .map(([k, v]) => `<div class="detail-row"><div class="k">${escapeHtml(k)}</div><div class="v">${k === 'CV' ? v : escapeHtml(v)}</div></div>`)
+      .join('');
+
+    document.getElementById('viewModal').classList.add('open');
+  }
+
+  function closeViewModal(){
+    document.getElementById('viewModal').classList.remove('open');
+  }
+
+  document.getElementById('viewModalClose').addEventListener('click', closeViewModal);
+  document.getElementById('viewModal').addEventListener('click', (e) => {
+    if (e.target.id === 'viewModal') closeViewModal();
+  });
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  let toastTimer = null;
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+</script>
+
+</body>
+</html>
