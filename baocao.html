@@ -653,6 +653,41 @@
     gap:24px;
   }
   .stage-fields .detail-field{min-width:130px;}
+  .edit-mode input[type="text"],
+  .edit-mode input[type="date"],
+  .edit-mode input[type="time"],
+  .edit-mode select{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    background:var(--cream);
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:7px 10px;
+    outline:none;
+    min-width:140px;
+  }
+  .edit-mode input:focus, .edit-mode select:focus{border-color:var(--orange);background:var(--white);}
+  .edit-mode input[type="file"]{font-size:12.5px;max-width:220px;}
+  .edit-file-current{margin-top:4px;font-size:12px;}
+  .stage-edit-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    padding:14px 20px;
+  }
+  .detail-save-btn{
+    border:none;
+    background:var(--orange);
+    color:var(--white);
+    font-weight:700;
+    font-size:13.5px;
+    padding:9px 18px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .detail-save-btn:hover{background:var(--orange-dark);}
+  .detail-save-btn:disabled{opacity:0.6;cursor:not-allowed;}
 
   @media (max-width:900px){
     .detail-grid.cols-3, .detail-grid.cols-5{grid-template-columns:repeat(2,1fr);}
@@ -880,41 +915,98 @@
     <div class="detail-card">
       <div class="detail-card-head"><span>📊 Quá trình ứng tuyển</span></div>
 
+      <!-- CV -->
       <div class="stage-row">
         <div class="stage-label">📄 CV</div>
         <div class="stage-fields">
           <div class="detail-field"><label>Ngày nộp</label><div class="val" id="stageCvDate">—</div></div>
           <div class="detail-field"><label>Tệp đính kèm</label><div class="val" id="stageCvFile">Chưa có</div></div>
-          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stageCvResult">Chưa có</span></div></div>
+          <div class="detail-field view-mode"><label>Kết quả</label><div><span class="pill-soft" id="stageCvResult">Chưa có</span></div></div>
+          <div class="detail-field edit-mode" style="display:none">
+            <label>Kết quả</label>
+            <select id="editKetQuaCV">
+              <option value="">— Chưa chọn —</option>
+              <option value="CV - Loại">CV - Loại</option>
+              <option value="CV - Pass">CV - Pass</option>
+              <option value="Đang chờ kết quả">Đang chờ kết quả</option>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- Phỏng vấn -->
       <div class="stage-row">
         <div class="stage-label">🗓️ Phỏng vấn</div>
         <div class="stage-fields">
-          <div class="detail-field"><label>Giờ</label><div class="val">—</div></div>
-          <div class="detail-field"><label>Ngày</label><div class="val">—</div></div>
-          <div class="detail-field"><label>Địa điểm</label><div class="val">—</div></div>
-          <div class="detail-field"><label>Người phỏng vấn</label><div class="val">—</div></div>
-          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stagePvResult">Chưa có</span></div></div>
+          <div class="detail-field view-mode"><label>Giờ</label><div class="val" id="viewGioPV">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Giờ</label><input type="time" id="editGioPV"></div>
+
+          <div class="detail-field view-mode"><label>Ngày</label><div class="val" id="viewNgayPV">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Ngày</label><input type="date" id="editNgayPV"></div>
+
+          <div class="detail-field view-mode"><label>Địa điểm</label><div class="val" id="viewDiaDiemPV">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Địa điểm</label><input type="text" id="editDiaDiemPV" placeholder="Vd: 26 Trung Hoà"></div>
+
+          <div class="detail-field view-mode"><label>Người phỏng vấn</label><div class="val" id="viewNguoiPV">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Người phỏng vấn</label><input type="text" id="editNguoiPV" placeholder="Tên người phỏng vấn"></div>
+
+          <div class="detail-field view-mode"><label>Kết quả</label><div><span class="pill-soft" id="stagePvResult">Chưa có</span></div></div>
+          <div class="detail-field edit-mode" style="display:none">
+            <label>Kết quả</label>
+            <select id="editKetQuaPV">
+              <option value="">— Chưa chọn —</option>
+              <option value="Từ chối PV">Từ chối PV</option>
+              <option value="PV - Loại">PV - Loại</option>
+              <option value="PV - Pass">PV - Pass</option>
+              <option value="Đang chờ kết quả">Đang chờ kết quả</option>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- Đánh giá (không có Kết quả) -->
       <div class="stage-row">
         <div class="stage-label">📋 Đánh giá</div>
         <div class="stage-fields">
-          <div class="detail-field"><label>Tệp phiếu đánh giá</label><div class="val">Chưa có</div></div>
-          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft">Chưa có</span></div></div>
+          <div class="detail-field view-mode"><label>Tệp phiếu đánh giá</label><div class="val" id="viewDanhGiaFile">Chưa có</div></div>
+          <div class="detail-field edit-mode" style="display:none">
+            <label>Tệp phiếu đánh giá (PDF)</label>
+            <input type="file" id="editDanhGiaFile" accept="application/pdf">
+            <div class="edit-file-current" id="currentDanhGiaFile"></div>
+          </div>
         </div>
       </div>
 
+      <!-- Offer -->
       <div class="stage-row">
         <div class="stage-label">🤝 Offer</div>
         <div class="stage-fields">
-          <div class="detail-field"><label>Ngày offer</label><div class="val">—</div></div>
-          <div class="detail-field"><label>Tệp thư offer</label><div class="val">Chưa có</div></div>
-          <div class="detail-field"><label>Kết quả</label><div><span class="pill-soft" id="stageOfferResult">Chưa có</span></div></div>
+          <div class="detail-field view-mode"><label>Ngày offer</label><div class="val" id="viewNgayOffer">—</div></div>
+          <div class="detail-field edit-mode" style="display:none"><label>Ngày offer</label><input type="date" id="editNgayOffer"></div>
+
+          <div class="detail-field view-mode"><label>Tệp thư offer</label><div class="val" id="viewOfferFile">Chưa có</div></div>
+          <div class="detail-field edit-mode" style="display:none">
+            <label>Tệp thư offer (PDF)</label>
+            <input type="file" id="editOfferFile" accept="application/pdf">
+            <div class="edit-file-current" id="currentOfferFile"></div>
+          </div>
+
+          <div class="detail-field view-mode"><label>Kết quả</label><div><span class="pill-soft" id="stageOfferResult">Chưa có</span></div></div>
+          <div class="detail-field edit-mode" style="display:none">
+            <label>Kết quả</label>
+            <select id="editKetQuaOffer">
+              <option value="">— Chưa chọn —</option>
+              <option value="Từ chối Offer">Từ chối Offer</option>
+              <option value="Đã tuyển">Đã tuyển</option>
+              <option value="Đang chờ kết quả">Đang chờ kết quả</option>
+            </select>
+          </div>
         </div>
+      </div>
+
+      <div class="stage-edit-actions edit-mode" id="stageEditActions" style="display:none">
+        <button type="button" class="detail-edit-btn" id="stageCancelBtn">Hủy</button>
+        <button type="button" class="detail-save-btn" id="stageSaveBtn">💾 Lưu thay đổi</button>
       </div>
     </div>
   </div>
@@ -1436,9 +1528,10 @@
   }
 
   function resultPillClass(text){
-    if (text === 'Pass' || text === 'Chấp nhận') return 'pill-soft pass';
-    if (text === 'Loại' || text === 'Từ chối') return 'pill-soft fail';
-    if (text === 'Đã tuyển') return 'pill-soft hired';
+    const t = String(text || '');
+    if (t.includes('Đã tuyển')) return 'pill-soft hired';
+    if (t.includes('Pass')) return 'pill-soft pass';
+    if (t.includes('Loại') || t.includes('Từ chối')) return 'pill-soft fail';
     return 'pill-soft';
   }
 
@@ -1464,7 +1557,7 @@
     setText('detailKinhNghiem', a.kinhNghiem);
     setText('detailCauHoiKhac', a.cauHoiKhac);
 
-    // --- Quá trình ứng tuyển: suy ra từ Trạng thái hiện có (chưa có dữ liệu lịch phỏng vấn/đánh giá/offer riêng) ---
+    // --- Quá trình ứng tuyển ---
     setText('stageCvDate', formatDateDisplay(a.thoiGianGui));
     const cvFileEl = document.getElementById('stageCvFile');
     cvFileEl.innerHTML = a.cvUrl
@@ -1473,33 +1566,163 @@
 
     const t = String(a.trangThai || '').trim();
 
-    let cvResult = 'Chưa có';
-    if (t === 'CV - Loại') cvResult = 'Loại';
-    else if (hasPassedCV(t)) cvResult = 'Pass';
-    document.getElementById('stageCvResult').textContent = cvResult;
-    document.getElementById('stageCvResult').className = resultPillClass(cvResult);
+    // Kết quả CV: ưu tiên giá trị đã chọn tay (Kết quả CV); nếu chưa có, suy ra tạm từ Trạng thái cũ
+    let cvResult = a.ketQuaCV || (t === 'CV - Loại' ? 'CV - Loại' : (hasPassedCV(t) ? 'CV - Pass' : ''));
+    setPill('stageCvResult', cvResult);
 
-    let pvResult = 'Chưa có';
-    if (t === 'PV - Pass') pvResult = 'Pass';
-    else if (t === 'PV - Loại') pvResult = 'Loại';
-    else if (t === 'Từ chối PV') pvResult = 'Từ chối';
-    else if (t === 'Từ chối Offer' || t === 'Đã tuyển') pvResult = 'Pass'; // đã qua phỏng vấn mới tới được bước này
-    document.getElementById('stagePvResult').textContent = pvResult;
-    document.getElementById('stagePvResult').className = resultPillClass(pvResult);
+    // Phỏng vấn — hiện dữ liệu thật
+    setText('viewGioPV', a.gioPV);
+    setText('viewNgayPV', formatDateDisplay(a.ngayPV) !== '—' ? formatDateDisplay(a.ngayPV) : a.ngayPV);
+    setText('viewDiaDiemPV', a.diaDiemPV);
+    setText('viewNguoiPV', a.nguoiPV);
+    let pvResult = a.ketQuaPV || (t === 'Từ chối PV' || t === 'PV - Loại' ? t : ((t === 'Từ chối Offer' || t === 'Đã tuyển') ? 'PV - Pass' : ''));
+    setPill('stagePvResult', pvResult);
 
-    let offerResult = 'Chưa có';
-    if (t === 'Từ chối Offer') offerResult = 'Từ chối';
-    else if (t === 'Đã tuyển') offerResult = 'Đã tuyển';
-    document.getElementById('stageOfferResult').textContent = offerResult;
-    document.getElementById('stageOfferResult').className = resultPillClass(offerResult);
+    // Đánh giá
+    const danhGiaEl = document.getElementById('viewDanhGiaFile');
+    danhGiaEl.innerHTML = a.danhGiaUrl
+      ? `<a class="cv-link" href="${a.danhGiaUrl}" target="_blank" rel="noopener">Xem tệp ↗</a>`
+      : 'Chưa có';
+
+    // Offer
+    setText('viewNgayOffer', formatDateDisplay(a.ngayOffer) !== '—' ? formatDateDisplay(a.ngayOffer) : a.ngayOffer);
+    const offerFileEl = document.getElementById('viewOfferFile');
+    offerFileEl.innerHTML = a.offerUrl
+      ? `<a class="cv-link" href="${a.offerUrl}" target="_blank" rel="noopener">Xem tệp ↗</a>`
+      : 'Chưa có';
+    let offerResult = a.ketQuaOffer || (t === 'Từ chối Offer' || t === 'Đã tuyển' ? t : '');
+    setPill('stageOfferResult', offerResult);
   }
 
-  document.getElementById('detailBackBtn').addEventListener('click', showListView);
-  document.getElementById('detailEditBtn').addEventListener('click', () => showToast('Chức năng chỉnh sửa đang được phát triển.'));
+  function setPill(id, value){
+    const el = document.getElementById(id);
+    el.textContent = value || 'Chưa có';
+    el.className = 'pill-soft ' + (value ? resultPillClass(value).replace('pill-soft','').trim() : '');
+  }
+
+  document.getElementById('detailBackBtn').addEventListener('click', () => {
+    exitEditMode();
+    showListView();
+  });
   document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
     if (!CURRENT_DETAIL_CODE) return;
     await deleteApplicants([CURRENT_DETAIL_CODE]);
     showListView();
+  });
+
+  // ============================================================
+  // CHỈNH SỬA "QUÁ TRÌNH ỨNG TUYỂN"
+  // ============================================================
+  function findCurrentApplicant(){
+    return ALL_APPLICANTS.find(x => x.maCV === CURRENT_DETAIL_CODE);
+  }
+
+  function enterEditMode(){
+    const a = findCurrentApplicant();
+    if (!a) return;
+
+    document.getElementById('editKetQuaCV').value = a.ketQuaCV || '';
+    document.getElementById('editGioPV').value = a.gioPV || '';
+    document.getElementById('editNgayPV').value = a.ngayPV || '';
+    document.getElementById('editDiaDiemPV').value = a.diaDiemPV || '';
+    document.getElementById('editNguoiPV').value = a.nguoiPV || '';
+    document.getElementById('editKetQuaPV').value = a.ketQuaPV || '';
+    document.getElementById('editNgayOffer').value = a.ngayOffer || '';
+    document.getElementById('editKetQuaOffer').value = a.ketQuaOffer || '';
+    document.getElementById('editDanhGiaFile').value = '';
+    document.getElementById('editOfferFile').value = '';
+    document.getElementById('currentDanhGiaFile').innerHTML = a.danhGiaUrl
+      ? `<a class="cv-link" href="${a.danhGiaUrl}" target="_blank" rel="noopener">Tệp hiện tại ↗</a>` : 'Chưa có tệp';
+    document.getElementById('currentOfferFile').innerHTML = a.offerUrl
+      ? `<a class="cv-link" href="${a.offerUrl}" target="_blank" rel="noopener">Tệp hiện tại ↗</a>` : 'Chưa có tệp';
+
+    document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.edit-mode').forEach(el => el.style.display = '');
+    document.getElementById('detailEditBtn').style.display = 'none';
+  }
+
+  function exitEditMode(){
+    document.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
+    document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+    document.getElementById('detailEditBtn').style.display = '';
+  }
+
+  function fileToBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('Không đọc được tệp'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  document.getElementById('detailEditBtn').addEventListener('click', enterEditMode);
+  document.getElementById('stageCancelBtn').addEventListener('click', exitEditMode);
+
+  document.getElementById('stageSaveBtn').addEventListener('click', async () => {
+    const a = findCurrentApplicant();
+    if (!a) return;
+
+    const saveBtn = document.getElementById('stageSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Đang lưu...';
+
+    try {
+      const danhGiaFile = document.getElementById('editDanhGiaFile').files[0];
+      const offerFile = document.getElementById('editOfferFile').files[0];
+
+      const payload = {
+        action: 'updateApplicantStage',
+        maCV: a.maCV,
+        gioPV: document.getElementById('editGioPV').value,
+        ngayPV: document.getElementById('editNgayPV').value,
+        diaDiemPV: document.getElementById('editDiaDiemPV').value.trim(),
+        nguoiPV: document.getElementById('editNguoiPV').value.trim(),
+        ketQuaCV: document.getElementById('editKetQuaCV').value,
+        ketQuaPV: document.getElementById('editKetQuaPV').value,
+        ngayOffer: document.getElementById('editNgayOffer').value,
+        ketQuaOffer: document.getElementById('editKetQuaOffer').value
+      };
+
+      if (danhGiaFile){
+        payload.danhGiaFileName = danhGiaFile.name;
+        payload.danhGiaMimeType = danhGiaFile.type || 'application/pdf';
+        payload.danhGiaBase64 = await fileToBase64(danhGiaFile);
+      }
+      if (offerFile){
+        payload.offerFileName = offerFile.name;
+        payload.offerMimeType = offerFile.type || 'application/pdf';
+        payload.offerBase64 = await fileToBase64(offerFile);
+      }
+
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Lưu thất bại');
+
+      // Cập nhật lại dữ liệu tại chỗ, không cần tải lại cả danh sách
+      Object.assign(a, {
+        gioPV: payload.gioPV, ngayPV: payload.ngayPV, diaDiemPV: payload.diaDiemPV, nguoiPV: payload.nguoiPV,
+        ketQuaCV: payload.ketQuaCV, ketQuaPV: payload.ketQuaPV,
+        ngayOffer: payload.ngayOffer, ketQuaOffer: payload.ketQuaOffer,
+        trangThai: payload.ketQuaOffer || payload.ketQuaPV || payload.ketQuaCV || a.trangThai
+      });
+      if (danhGiaFile) a.danhGiaUrl = 'pending'; // link thật sẽ có ở lần tải lại tiếp theo
+      if (offerFile) a.offerUrl = 'pending';
+
+      populateDetailView(a);
+      exitEditMode();
+      showToast('Đã lưu thay đổi.');
+      loadApplicants(); // đồng bộ lại link Drive thật + số liệu tổng hợp ở màn danh sách
+    } catch (err){
+      showToast('Lỗi khi lưu: ' + err.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Lưu thay đổi';
+    }
   });
 
   // ============================================================
