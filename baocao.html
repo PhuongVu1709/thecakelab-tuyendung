@@ -2135,6 +2135,9 @@
 
   // --- Gửi email (giữ đúng định dạng đậm/nghiêng/màu từ mẫu Sheet) ---
   let EMAIL_MODE = 'interview';
+  document.getElementById('emailSubjectPreview').addEventListener('input', function(){
+    const pos = this.selectionStart; this.value = this.value.toUpperCase(); try { this.setSelectionRange(pos, pos); } catch(e){}
+  });
   document.getElementById('btnSendEmail').addEventListener('click', async () => {
     const ctx = getInterviewBaseContext();
     if (!validateInterviewBase(ctx)) return;
@@ -2144,7 +2147,7 @@
 
     try {
       const tpl = await getInterviewTemplates();
-      const subject = fillInterviewTemplate(tpl.emailSubject, ctx);
+      const subject = fillInterviewTemplate(tpl.emailSubject, ctx).toUpperCase();
       const bodyHtml = fillInterviewTemplate(tpl.emailBodyHtml, ctx) + '<br><br>' + fillInterviewTemplate(tpl.signatureHtml, ctx);
 
       EMAIL_MODE = 'interview';
@@ -2177,7 +2180,7 @@
     if (EMAIL_MODE === 'offer' && !document.getElementById('ofAttachChk').checked && !confirm('Email chưa kèm tệp thư offer. Vẫn gửi?')) return;
 
     try {
-      const subject = document.getElementById('emailSubjectPreview').value.trim();
+      const subject = document.getElementById('emailSubjectPreview').value.trim().toUpperCase();
       const bodyHtml = document.getElementById('emailBodyPreview').innerHTML;
       const bodyText = document.getElementById('emailBodyPreview').innerText;
 
@@ -2815,7 +2818,7 @@
       return;
     }
     OFE.manual = false; OFE.warned = false;
-    document.getElementById('emailSubjectPreview').value = ofFillText(OFE.tpl.emailSubject);
+    document.getElementById('emailSubjectPreview').value = ofFillText(OFE.tpl.emailSubject).toUpperCase();
     document.getElementById('emailBodyPreview').innerHTML = ofFillHtml(OFE.tpl.emailBodyHtml) + '<br><br>' + ofFillHtml(OFE.tpl.signatureHtml);
     ofEmailHint();
   }
