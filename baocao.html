@@ -668,6 +668,9 @@
     outline:none;
     min-width:140px;
   }
+  .edit-mode textarea{font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);border:1.5px solid var(--line);background:var(--cream);border-radius:8px;padding:7px 10px;outline:none;resize:vertical;}
+  .edit-mode textarea:focus{border-color:var(--orange);background:var(--white);}
+  .prof-edit input,.prof-edit select,.prof-edit textarea{width:100%;box-sizing:border-box;min-width:0;}
   .edit-mode input:focus, .edit-mode select:focus{border-color:var(--orange);background:var(--white);}
   .edit-mode input[type="file"]{font-size:12.5px;max-width:220px;}
   .edit-file-current{margin-top:4px;font-size:12px;}
@@ -1002,26 +1005,26 @@
       <div class="detail-grid cols-3">
         <div class="detail-field"><label>Khối</label><div class="val" id="detailKhoi">—</div></div>
         <div class="detail-field"><label>Phòng ban</label><div class="val" id="detailPhongBan">—</div></div>
-        <div class="detail-field"><label>Vị trí ứng tuyển</label><div class="val" id="detailViTri">—</div></div>
+        <div class="detail-field"><label>Vị trí ứng tuyển</label><div class="val view-mode" id="detailViTri">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editViTri" list="viTriList"><datalist id="viTriList"></datalist></div></div>
       </div>
     </div>
 
     <div class="detail-card">
       <div class="detail-card-head"><span>👤 Thông tin ứng viên</span></div>
       <div class="detail-grid cols-5">
-        <div class="detail-field"><label>Họ và tên</label><div class="val" id="detailHoTen">—</div></div>
-        <div class="detail-field"><label>Ngày sinh</label><div class="val" id="detailNgaySinh">—</div></div>
-        <div class="detail-field"><label>Giới tính</label><div class="val" id="detailGioiTinh">—</div></div>
-        <div class="detail-field"><label>Email</label><div class="val" id="detailEmail">—</div></div>
-        <div class="detail-field"><label>Số điện thoại</label><div class="val" id="detailSdt">—</div></div>
+        <div class="detail-field"><label>Họ và tên</label><div class="val view-mode" id="detailHoTen">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editHoTen" placeholder="Họ và tên"></div></div>
+        <div class="detail-field"><label>Ngày sinh</label><div class="val view-mode" id="detailNgaySinh">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editNgaySinh" placeholder="dd/mm/yyyy"></div></div>
+        <div class="detail-field"><label>Giới tính</label><div class="val view-mode" id="detailGioiTinh">—</div><div class="edit-mode prof-edit" style="display:none"><select id="editGioiTinh"><option value="">— Chưa chọn —</option><option value="Nữ">Nữ</option><option value="Nam">Nam</option><option value="Khác">Khác</option></select></div></div>
+        <div class="detail-field"><label>Email</label><div class="val view-mode" id="detailEmail">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editEmail" placeholder=""></div></div>
+        <div class="detail-field"><label>Số điện thoại</label><div class="val view-mode" id="detailSdt">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editSdt" placeholder=""></div></div>
       </div>
       <div class="detail-grid cols-3" style="margin-top:14px">
-        <div class="detail-field"><label>Địa chỉ</label><div class="val" id="detailDiaChi">—</div></div>
-        <div class="detail-field"><label>Địa điểm làm việc</label><div class="val" id="detailDiaDiem">—</div></div>
-        <div class="detail-field"><label>Kinh nghiệm</label><div class="val" id="detailKinhNghiem">—</div></div>
+        <div class="detail-field"><label>Địa chỉ</label><div class="val view-mode" id="detailDiaChi">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editDiaChi" placeholder=""></div></div>
+        <div class="detail-field"><label>Địa điểm làm việc</label><div class="val view-mode" id="detailDiaDiem">—</div><div class="edit-mode prof-edit" style="display:none"><input type="text" id="editDiaDiem" placeholder=""></div></div>
+        <div class="detail-field"><label>Kinh nghiệm</label><div class="val view-mode" id="detailKinhNghiem">—</div><div class="edit-mode prof-edit" style="display:none"><textarea id="editKinhNghiem" rows="3"></textarea></div></div>
       </div>
       <div class="detail-grid cols-1" style="margin-top:0">
-        <div class="detail-field"><label>Câu hỏi khác dành cho The Cake Lab</label><div class="val" id="detailCauHoiKhac">—</div></div>
+        <div class="detail-field"><label>Câu hỏi khác dành cho The Cake Lab</label><div class="val view-mode" id="detailCauHoiKhac">—</div><div class="edit-mode prof-edit" style="display:none"><textarea id="editCauHoiKhac" rows="3"></textarea></div></div>
       </div>
     </div>
 
@@ -1868,6 +1871,11 @@
     REMOVE_DANHGIA = false;
     REMOVE_OFFER = false;
 
+    const PROF = { editHoTen:'hoTen', editNgaySinh:'ngaySinh', editGioiTinh:'gioiTinh', editEmail:'email', editSdt:'soDienThoai',
+      editDiaChi:'diaChi', editDiaDiem:'diaDiem', editKinhNghiem:'kinhNghiem', editCauHoiKhac:'cauHoiKhac', editViTri:'viTri' };
+    Object.keys(PROF).forEach(id => { document.getElementById(id).value = a[PROF[id]] || ''; });
+    document.getElementById('viTriList').innerHTML = Array.from(new Set(ALL_APPLICANTS.map(x => x.viTri).filter(Boolean)))
+      .map(v => '<option value="' + escapeHtml(v) + '"></option>').join('');
     document.getElementById('editKetQuaCV').value = a.ketQuaCV || '';
     document.getElementById('editGioPV').value = a.gioPV || '';
     document.getElementById('editNgayPV').value = a.ngayPV || '';
@@ -1931,8 +1939,21 @@
         ngayOffer: document.getElementById('editNgayOffer').value,
         ketQuaOffer: document.getElementById('editKetQuaOffer').value,
         removeDanhGia: REMOVE_DANHGIA,
-        removeOffer: REMOVE_OFFER
+        removeOffer: REMOVE_OFFER,
+        profile: {
+          hoTen: document.getElementById('editHoTen').value.trim(),
+          ngaySinh: document.getElementById('editNgaySinh').value.trim(),
+          gioiTinh: document.getElementById('editGioiTinh').value,
+          email: document.getElementById('editEmail').value.trim(),
+          soDienThoai: document.getElementById('editSdt').value.trim(),
+          diaChi: document.getElementById('editDiaChi').value.trim(),
+          viTri: document.getElementById('editViTri').value.trim(),
+          diaDiem: document.getElementById('editDiaDiem').value.trim(),
+          kinhNghiem: document.getElementById('editKinhNghiem').value.trim(),
+          cauHoiKhac: document.getElementById('editCauHoiKhac').value.trim()
+        }
       };
+      if (!payload.profile.hoTen) throw new Error('Họ và tên không được để trống');
 
       if (danhGiaFile && !REMOVE_DANHGIA){
         payload.danhGiaFileName = danhGiaFile.name;
@@ -1958,6 +1979,10 @@
         gioPV: payload.gioPV, ngayPV: payload.ngayPV, diaDiemPV: payload.diaDiemPV, nguoiPV: payload.nguoiPV,
         ketQuaCV: payload.ketQuaCV, ketQuaPV: payload.ketQuaPV, thoiGianPhanHoi: payload.thoiGianPhanHoi,
         ngayOffer: payload.ngayOffer, ketQuaOffer: payload.ketQuaOffer,
+        hoTen: payload.profile.hoTen, ngaySinh: payload.profile.ngaySinh, gioiTinh: payload.profile.gioiTinh,
+        email: payload.profile.email, soDienThoai: payload.profile.soDienThoai, diaChi: payload.profile.diaChi,
+        viTri: payload.profile.viTri, diaDiem: payload.profile.diaDiem, kinhNghiem: payload.profile.kinhNghiem,
+        cauHoiKhac: payload.profile.cauHoiKhac, khoi: json.khoi || '', phongBan: json.phongBan || '',
         trangThai: payload.ketQuaOffer || payload.ketQuaPV || payload.ketQuaCV || a.trangThai
       });
       // URL thật (hoặc rỗng nếu vừa xoá) lấy trực tiếp từ phản hồi server — không cần tải lại cả danh sách
