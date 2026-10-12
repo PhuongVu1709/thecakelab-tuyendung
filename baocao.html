@@ -1098,7 +1098,7 @@
           <div class="detail-field edit-mode" style="display:none"><label>Thời gian phản hồi</label><input type="text" id="editThoiGianPhanHoi" placeholder="Vd: 17h ngày 01/10/2026"></div>
         </div>
 
-        <div class="interview-actions edit-mode" style="display:none">
+        <div class="interview-actions">
           <div class="interview-action-buttons">
             <button type="button" class="interview-btn" id="btnSendMessage">📩 Gửi tin nhắn</button>
             <button type="button" class="interview-btn" id="btnSendEmail">📧 Gửi email</button>
@@ -2082,6 +2082,17 @@
 
   function getInterviewBaseContext(){
     const a = findCurrentApplicant();
+    const editing = document.getElementById('detailEditBtn').style.display === 'none';
+    if (!editing && a){
+      // Chưa bấm "Chỉnh sửa": lấy dữ liệu đã lưu của ứng viên
+      return {
+        hoTen: a.hoTen, viTri: a.viTri,
+        gio: a.gioPV || '',
+        ngay: a.ngayPV ? formatDateDisplay(a.ngayPV) : '',
+        diaDiem: String(a.diaDiemPV || '').trim(),
+        hanXacNhan: String(a.thoiGianPhanHoi || '').trim()
+      };
+    }
     return {
       hoTen: a ? a.hoTen : '',
       viTri: a ? a.viTri : '',
