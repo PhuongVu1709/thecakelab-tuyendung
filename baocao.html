@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <style>
   :root{
     --orange:#F37021;
@@ -692,6 +693,25 @@
   }
   .interview-btn:hover{background:var(--blue-tint);}
 
+  /* ---------- THƯ MỜI NHẬN VIỆC ---------- */
+  .offer-page-title{font-family:'Be Vietnam Pro',sans-serif;font-weight:800;font-size:20px;color:var(--ink);}
+  .offer-layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start;}
+  .offer-form{display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 130px);overflow:auto;padding-right:4px;}
+  .offer-form .detail-card{margin-bottom:0;}
+  .offer-fields{padding:6px 18px 16px;display:flex;flex-direction:column;gap:12px;}
+  .offer-fields label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px;}
+  .offer-fields input,.offer-fields textarea{
+    width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+    border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--white);outline:none;box-sizing:border-box;
+  }
+  .offer-fields input:focus,.offer-fields textarea:focus{border-color:var(--orange);}
+  .offer-preview{background:#E9E3DA;border-radius:14px;padding:22px;max-height:calc(100vh - 130px);overflow:auto;}
+  .offer-state{padding:30px 10px;text-align:center;color:var(--ink-soft);font-size:14px;}
+  @media (max-width:980px){
+    .offer-layout{grid-template-columns:1fr;}
+    .offer-form,.offer-preview{max-height:none;}
+  }
+
   .modal-footer{
     padding:14px 22px;
     border-top:1px solid var(--line);
@@ -783,6 +803,19 @@
   @media (max-width:640px){
     .summary-row{grid-template-columns:1fr;}
   }
+</style>
+<style id="offerPaperCss">
+  .ol-paper{width:210mm;max-width:none;margin:0 auto;background:#fff;color:#000;box-sizing:border-box;
+    padding:18mm 20mm 20mm;font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.45;
+    box-shadow:0 4px 18px rgba(0,0,0,.18);}
+  .ol-head{text-align:right;color:#C0651F;font-size:10pt;line-height:1.5;margin-bottom:14mm;}
+  .ol-head .ol-brand{font-weight:700;}
+  .ol-head .ol-i{font-style:italic;}
+  .ol-title{text-align:center;font-weight:700;font-size:17pt;letter-spacing:.02em;margin:0 0 7mm;text-transform:uppercase;}
+  .ol-p{margin:0;white-space:pre-wrap;word-wrap:break-word;}
+  .ol-p.ol-indent{padding-left:9mm;}
+  .ol-p.ol-blank{height:6pt;}
+  .ol-empty{letter-spacing:0;}
 </style>
 </head>
 <body>
@@ -1084,6 +1117,10 @@
               <option value="Đang chờ kết quả">Đang chờ kết quả</option>
             </select>
           </div>
+
+          <div class="detail-field" style="align-self:flex-end">
+            <button type="button" class="interview-btn" id="btnOfferLetter">📄 Thư mời nhận việc</button>
+          </div>
         </div>
       </div>
 
@@ -1091,6 +1128,25 @@
         <button type="button" class="detail-edit-btn" id="stageCancelBtn">Hủy</button>
         <button type="button" class="detail-save-btn" id="stageSaveBtn">💾 Lưu thay đổi</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ THƯ MỜI NHẬN VIỆC (màn hình riêng) ============ -->
+  <div class="detail-page" id="viewOffer">
+    <div class="detail-topbar">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <button class="back-btn-detail" id="offerBackBtn">← Quay lại</button>
+        <span class="offer-page-title">📄 <span id="offerTitleText">Thư Mời Nhận Việc</span></span>
+      </div>
+      <div class="detail-actions">
+        <button class="detail-edit-btn" id="offerReloadBtn" title="Tải lại mẫu mới nhất từ Google Sheet">🔄 Tải lại mẫu</button>
+        <button class="detail-edit-btn" id="offerWordBtn">⬇️ Xuất Word (.docx)</button>
+        <button class="detail-save-btn" id="offerPdfBtn">🖨️ In / Xuất PDF</button>
+      </div>
+    </div>
+    <div class="offer-layout">
+      <div class="offer-form" id="offerForm"><div class="offer-state">Đang tải mẫu…</div></div>
+      <div class="offer-preview"><div class="ol-paper" id="offerPaper"></div></div>
     </div>
   </div>
 
@@ -1921,13 +1977,15 @@
   // Thay các placeholder dạng [Tên ứng viên] bằng dữ liệu ứng viên + thông tin phỏng vấn đang nhập.
   // Hoạt động như nhau trên cả bản text thuần lẫn bản HTML (placeholder luôn là text thường, không nằm trong thẻ).
   function fillInterviewTemplate(text, ctx){
+    // Nhận cả 2 kiểu ngoặc [placeholder] và {placeholder} — phòng khi mẫu trong Sheet
+    // được đổi qua lại giữa 2 kiểu, không bị lệch mất công tìm lại lỗi này lần nữa.
     return String(text || '')
-      .replace(/\[Tên ứng viên\]/gi, ctx.hoTen || '')
-      .replace(/\[Vị trí tuyển dụng\]/gi, ctx.viTri || '')
-      .replace(/\[Giờ\]/gi, ctx.gio || '')
-      .replace(/\[Ngày phỏng vấn\]/gi, ctx.ngay || '')
-      .replace(/\[Địa điểm phỏng vấn\]/gi, ctx.diaDiem || '')
-      .replace(/\[Thời gian xác nhận\]/gi, ctx.hanXacNhan || '');
+      .replace(/[\[{]Tên ứng viên[\]}]/gi, ctx.hoTen || '')
+      .replace(/[\[{]Vị trí tuyển dụng[\]}]/gi, ctx.viTri || '')
+      .replace(/[\[{]Giờ[\]}]/gi, ctx.gio || '')
+      .replace(/[\[{]Ngày phỏng vấn[\]}]/gi, ctx.ngay || '')
+      .replace(/[\[{]Địa điểm phỏng vấn[\]}]/gi, ctx.diaDiem || '')
+      .replace(/[\[{]Thời gian xác nhận[\]}]/gi, ctx.hanXacNhan || '');
   }
 
   function getInterviewBaseContext(){
@@ -2067,6 +2125,366 @@
     const duration = Math.min(7000, Math.max(2600, msg.length * 60));
     toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
   }
+
+  // ============================================================
+  // THƯ MỜI NHẬN VIỆC — mẫu lấy từ tab "MẪU THƯ MỜI NHẬN VIỆC"
+  // Ô nhập được SINH TỰ ĐỘNG theo các placeholder [..] có trong mẫu,
+  // nên sửa mẫu trong Sheet thì form + thư tự đổi theo.
+  // ============================================================
+  const OFFER_HEAD = [
+    ['Recruitment Team @The Cake Lab', 'brand'],
+    ['E: thecakelab.recruitment@gmail.com', 'i'],
+    ['P: 086 988 6287', 'i'],
+    ['A: Tầng 4, 26 Trung Hoà, Cầu Giấy, Hà Nội', 'i']
+  ];
+  const OFFER_ALIASES = { 'vị trí tuyển dụng': 'vị trí', 'vị trí ứng tuyển': 'vị trí' };
+  const OFFER_CANDIDATE_KEYS = ['tên ứng viên', 'vị trí', 'bộ phận'];
+  const OFFER_REMEMBER = ['phụ cấp ăn ca', 'phụ cấp chuyên cần', 'thời gian làm việc', 'số tháng thử việc'];
+  const OFFER_HINTS = {
+    'lương cơ bản': 'VD: 12.000.000', 'lương kpis': 'VD: 2.000.000', 'lương trách nhiệm': 'VD: 1.000.000',
+    'thu nhập khác': 'VD: 2% doanh thu...', 'số tháng thử việc': 'VD: 02',
+    'phụ cấp ăn ca': 'VD: 650.000/tháng (25.000/ngày)', 'phụ cấp chuyên cần': 'VD: 300.000/tháng',
+    'thời gian làm việc': 'VD: 09:00 - 18:00 (26 công/tháng)'
+  };
+  const OFFER_STORE_KEY = 'tcl_offer_defaults_v1';
+  const OFFER_PH_RE = /[\[{]([^\]}\[{\n]{1,60})[\]}]/g;
+
+  let OFFER_TPL = null;            // { title, lines:[{runs,blank,indent}] } — lấy từ Sheet
+  let OFFER_FIELDS = [];           // [{key,label,type}]
+  let OFFER_VALUES = {};           // giá trị đang nhập (key -> text)
+  const OFFER_VALUES_BY_CODE = {}; // nhớ giá trị theo từng ứng viên trong phiên làm việc
+  let OFFER_CODE = '';
+
+  function olNorm(s){ return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  function olKey(label){ const k = olNorm(label); return OFFER_ALIASES[k] || k; }
+  function olEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function olIsMoney(key){ return /^(lương|thu nhập)/.test(key); }
+  function olIsDate(key){ return /(^|\s)(ngày|hạn)(\s|$)/.test(key); }
+  function olLoadDefaults(){ try { return JSON.parse(localStorage.getItem(OFFER_STORE_KEY) || '{}'); } catch(e){ return {}; } }
+  function olSaveDefault(key, v){
+    if (OFFER_REMEMBER.indexOf(key) < 0) return;
+    try { const d = olLoadDefaults(); d[key] = v; localStorage.setItem(OFFER_STORE_KEY, JSON.stringify(d)); } catch(e){}
+  }
+  function olRgbToHex(c){
+    const m = String(c || '').match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+    if (m) return [m[1],m[2],m[3]].map(n => ('0' + (+n).toString(16)).slice(-2)).join('').toUpperCase();
+    const h = String(c || '').replace('#','');
+    return /^[0-9a-f]{6}$/i.test(h) ? h.toUpperCase() : '';
+  }
+
+  // HTML (từ Sheet, có đậm/nghiêng/gạch chân/màu) -> danh sách dòng, mỗi dòng gồm các "run"
+  function olHtmlToLines(html){
+    const doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html');
+    const lines = [{ runs: [] }];
+    (function walk(node, st){
+      node.childNodes.forEach(n => {
+        if (n.nodeType === 3){
+          if (n.nodeValue) lines[lines.length - 1].runs.push(Object.assign({ t: n.nodeValue }, st));
+        } else if (n.nodeName === 'BR'){
+          lines.push({ runs: [] });
+        } else if (n.nodeType === 1){
+          const s = Object.assign({}, st);
+          if (n.nodeName === 'B' || n.nodeName === 'STRONG') s.b = true;
+          if (n.nodeName === 'I' || n.nodeName === 'EM') s.i = true;
+          if (n.nodeName === 'U') s.u = true;
+          if (n.style && n.style.color) s.c = olRgbToHex(n.style.color);
+          walk(n, s);
+        }
+      });
+    })(doc.getElementById('r'), { b: false, i: false, u: false, c: '' });
+    return lines;
+  }
+
+  function olBoldRanges(line, ranges){
+    if (!ranges.length) return;
+    const out = []; let pos = 0;
+    line.runs.forEach(r => {
+      const s = pos, e = pos + r.t.length; pos = e;
+      const cuts = new Set([0, r.t.length]);
+      ranges.forEach(rg => rg.forEach(x => { if (x > s && x < e) cuts.add(x - s); }));
+      const pts = Array.from(cuts).sort((x, y) => x - y);
+      for (let i = 0; i < pts.length - 1; i++){
+        const seg = r.t.slice(pts[i], pts[i + 1]); if (!seg) continue;
+        const mid = s + pts[i];
+        out.push(Object.assign({}, r, { t: seg, b: r.b || ranges.some(rg => mid >= rg[0] && mid < rg[1]) }));
+      }
+    });
+    line.runs = out;
+  }
+
+  // Nếu mẫu trong Sheet chưa tô đậm gì, tự định dạng giống thư mẫu (tiêu đề mục, nhãn mục 1, dòng thử việc).
+  // Nếu HR đã tô đậm/nghiêng trong Sheet thì GIỮ NGUYÊN định dạng của Sheet.
+  function olPrepareLines(lines){
+    const hasBold = lines.some(l => l.runs.some(r => r.b));
+    let section = 0;
+    lines.forEach(l => {
+      const text = l.runs.map(r => r.t).join('');
+      const tr = text.trim();
+      if (!tr){ l.blank = true; return; }
+      const income = /^(Lương|Thu nhập khác)/i.test(tr), trial = /^\(Thử việc/i.test(tr);
+      if (income || trial) l.indent = true;
+      const hm = tr.match(/^(\d+)\.\s+/);
+      const isHeading = !!hm && tr === tr.toUpperCase();
+      if (isHeading) section = +hm[1];
+      if (hasBold) return;
+      if (isHeading){ l.runs.forEach(r => r.b = true); return; }
+      if (trial){ l.runs.forEach(r => r.i = true); return; }
+      if (section === 1 && !income){
+        const re = /(^|\s{3,})([^:\[\]{}\n]{2,30}:)/g; let m; const ranges = [];
+        while ((m = re.exec(text))){ const st = m.index + m[1].length; ranges.push([st, st + m[2].length]); }
+        olBoldRanges(l, ranges);
+      }
+    });
+    // bỏ dòng trống ở đầu/cuối và gộp các dòng trống liên tiếp
+    const out = [];
+    lines.forEach(l => { if (l.blank && (!out.length || out[out.length - 1].blank)) return; out.push(l); });
+    while (out.length && out[out.length - 1].blank) out.pop();
+    return out;
+  }
+
+  function olCollectFields(lines){
+    const seen = {}, fields = [];
+    lines.forEach(l => l.runs.forEach(r => {
+      OFFER_PH_RE.lastIndex = 0; let m;
+      while ((m = OFFER_PH_RE.exec(r.t))){
+        const label = m[1].trim(), key = olKey(label);
+        if (seen[key]) continue;
+        seen[key] = true;
+        const shown = key === 'vị trí' ? 'Vị trí' : label;
+        fields.push({ key: key, label: shown, type: olIsDate(key) ? 'date' : 'text' });
+      }
+    }));
+    return fields;
+  }
+
+  function olFormatMoney(v){
+    if (!/^[\d.,\s]+$/.test(v)) return v;
+    const digits = v.replace(/\D/g, '');
+    return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+  }
+
+  function olValueOf(key){
+    const f = OFFER_FIELDS.find(x => x.key === key);
+    let v = String(OFFER_VALUES[key] || '').trim();
+    if (f && f.type === 'date'){
+      const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) v = m[3] + '/' + m[2] + '/' + m[1];
+    }
+    return v;
+  }
+
+  // Ghép mẫu + dữ liệu => model dùng chung cho xem trước / Word / PDF
+  function olBuildModel(){
+    const lines = OFFER_TPL.lines.map(l => ({
+      blank: l.blank, indent: l.indent,
+      runs: l.runs.map(r => Object.assign({}, r))
+    }));
+    lines.forEach(l => {
+      const out = [];
+      l.runs.forEach(r => {
+        let last = 0, m; OFFER_PH_RE.lastIndex = 0;
+        while ((m = OFFER_PH_RE.exec(r.t))){
+          if (m.index > last) out.push(Object.assign({}, r, { t: r.t.slice(last, m.index) }));
+          const label = m[1].trim(), v = olValueOf(olKey(label));
+          if (!v){
+            out.push(Object.assign({}, r, { t: '………………………', k: 'empty' }));
+          } else {
+            const up = olNorm(label) === 'tên ứng viên' || olNorm(label) === 'vị trí tuyển dụng';
+            out.push(Object.assign({}, r, { t: up ? v.toUpperCase() : v, b: up ? true : r.b, k: 'val' }));
+          }
+          last = m.index + m[0].length;
+        }
+        if (last < r.t.length) out.push(Object.assign({}, r, { t: r.t.slice(last) }));
+      });
+      l.runs = out;
+    });
+    return { title: OFFER_TPL.title, lines: lines };
+  }
+
+  function olRunsHtml(l){
+    return l.runs.map(r => {
+      let st = '';
+      if (r.b) st += 'font-weight:700;';
+      if (r.i) st += 'font-style:italic;';
+      if (r.u) st += 'text-decoration:underline;';
+      if (r.c && r.c !== '000000') st += 'color:#' + r.c + ';';
+      return '<span' + (r.k === 'empty' ? ' class="ol-empty"' : '') + (st ? ' style="' + st + '"' : '') + '>' + olEsc(r.t) + '</span>';
+    }).join('');
+  }
+
+  function olPaperHtml(model){
+    const head = '<div class="ol-head">' + OFFER_HEAD.map(h =>
+      '<div class="' + (h[1] === 'brand' ? 'ol-brand' : 'ol-i') + '">' + olEsc(h[0]) + '</div>').join('') + '</div>';
+    const body = model.lines.map(l => l.blank
+      ? '<p class="ol-p ol-blank"></p>'
+      : '<p class="ol-p' + (l.indent ? ' ol-indent' : '') + '">' + olRunsHtml(l) + '</p>').join('');
+    return head + '<div class="ol-title">' + olEsc(model.title) + '</div>' + body;
+  }
+
+  function olRenderPreview(){
+    if (!OFFER_TPL) return;
+    document.getElementById('offerPaper').innerHTML = olPaperHtml(olBuildModel());
+  }
+
+  function olRenderForm(){
+    const box = document.getElementById('offerForm');
+    const cand = OFFER_FIELDS.filter(f => OFFER_CANDIDATE_KEYS.indexOf(f.key) >= 0);
+    const job = OFFER_FIELDS.filter(f => OFFER_CANDIDATE_KEYS.indexOf(f.key) < 0);
+    const fieldHtml = f => {
+      const hint = OFFER_HINTS[f.key] || (f.type === 'date' ? '' : '');
+      return '<div><label>' + olEsc(f.label) + '</label>' +
+        '<input type="' + f.type + '" data-key="' + olEsc(f.key) + '" value="' + olEsc(OFFER_VALUES[f.key] || '') + '" placeholder="' + olEsc(hint) + '"></div>';
+    };
+    let html = '';
+    if (cand.length) html += '<div class="detail-card"><div class="detail-card-head"><span>👤 Thông tin ứng viên</span></div><div class="offer-fields">' + cand.map(fieldHtml).join('') + '</div></div>';
+    if (job.length) html += '<div class="detail-card"><div class="detail-card-head"><span>💼 Chi tiết công việc</span></div><div class="offer-fields">' + job.map(fieldHtml).join('') + '</div></div>';
+    if (!html) html = '<div class="offer-state">Mẫu thư không có ô [thông tin] nào cần nhập.</div>';
+    box.innerHTML = html;
+    box.querySelectorAll('input[data-key]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const key = inp.dataset.key;
+        if (olIsMoney(key)){
+          const f = olFormatMoney(inp.value);
+          if (f !== inp.value) inp.value = f;
+        }
+        OFFER_VALUES[key] = inp.value;
+        olSaveDefault(key, inp.value);
+        olRenderPreview();
+      });
+    });
+  }
+
+  async function olLoadTemplate(){
+    const res = await fetch(APPS_SCRIPT_URL + '?action=offerLetterTemplate&_=' + Date.now());
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Không tải được mẫu thư mời nhận việc');
+    const lines = olPrepareLines(olHtmlToLines(json.bodyHtml || ''));
+    OFFER_TPL = { title: json.title || 'THƯ MỜI NHẬN VIỆC', lines: lines };
+    OFFER_FIELDS = olCollectFields(lines);
+    document.getElementById('offerTitleText').textContent = OFFER_TPL.title.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  }
+
+  function olSeedValues(a){
+    const saved = OFFER_VALUES_BY_CODE[a.maCV];
+    if (saved){ OFFER_VALUES = saved; return; }
+    const d = olLoadDefaults();
+    OFFER_VALUES = {
+      'tên ứng viên': a.hoTen || '', 'vị trí': a.viTri || '', 'bộ phận': a.phongBan || '',
+      'địa điểm làm việc': a.diaDiem || ''
+    };
+    OFFER_REMEMBER.forEach(k => { if (d[k]) OFFER_VALUES[k] = d[k]; });
+    OFFER_VALUES_BY_CODE[a.maCV] = OFFER_VALUES;
+  }
+
+  async function olOpen(reload){
+    const a = findCurrentApplicant();
+    if (!a){ showToast('Không tìm thấy ứng viên.'); return; }
+    OFFER_CODE = a.maCV;
+    document.getElementById('viewDetail').classList.remove('show');
+    document.getElementById('viewOffer').classList.add('show');
+    document.getElementById('viewOffer').scrollTop = 0;
+    document.getElementById('offerForm').innerHTML = '<div class="offer-state">Đang tải mẫu từ Google Sheet…</div>';
+    document.getElementById('offerPaper').innerHTML = '';
+    try {
+      await olLoadTemplate();
+      if (reload && OFFER_VALUES_BY_CODE[a.maCV]) OFFER_VALUES = OFFER_VALUES_BY_CODE[a.maCV]; else olSeedValues(a);
+      olRenderForm();
+      olRenderPreview();
+    } catch (err){
+      document.getElementById('offerForm').innerHTML = '<div class="offer-state">⚠️ ' + olEsc(err.message || err) + '</div>';
+    }
+  }
+
+  document.getElementById('btnOfferLetter').addEventListener('click', () => olOpen(false));
+  document.getElementById('offerReloadBtn').addEventListener('click', () => olOpen(true));
+  document.getElementById('offerBackBtn').addEventListener('click', () => {
+    document.getElementById('viewOffer').classList.remove('show');
+    document.getElementById('viewDetail').classList.add('show');
+  });
+
+  function olFileName(ext){
+    const n = (OFFER_VALUES['tên ứng viên'] || '').trim().replace(/[\\/:*?"<>|]/g, '');
+    return 'Thu moi nhan viec' + (n ? ' - ' + n : '') + '.' + ext;
+  }
+
+  // --- Xuất PDF: in riêng đúng tờ thư (không kèm giao diện) ---
+  document.getElementById('offerPdfBtn').addEventListener('click', () => {
+    if (!OFFER_TPL){ showToast('Mẫu thư chưa tải xong.'); return; }
+    const css = document.getElementById('offerPaperCss').textContent;
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+    document.body.appendChild(iframe);
+    const d = iframe.contentWindow.document;
+    d.open();
+    d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + olEsc(olFileName('pdf').replace(/\.pdf$/, '')) + '</title><style>' + css +
+      '@page{size:A4;margin:0}html,body{margin:0;background:#fff}.ol-paper{box-shadow:none;width:210mm;min-height:297mm}' +
+      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body><div class="ol-paper">' + olPaperHtml(olBuildModel()) + '</div></body></html>');
+    d.close();
+    setTimeout(() => {
+      try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch (e){ showToast('Không mở được hộp thoại in.'); }
+      setTimeout(() => iframe.remove(), 60000);
+    }, 400);
+  });
+
+  // --- Xuất Word (.docx) ---
+  function olDownload(blob, name){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
+  function olBuildDocx(model){
+    const D = window.docx, FONT = 'Times New Roman';
+    const kids = [];
+    OFFER_HEAD.forEach((h, idx) => kids.push(new D.Paragraph({
+      alignment: D.AlignmentType.RIGHT,
+      spacing: { after: idx === OFFER_HEAD.length - 1 ? 520 : 0 },
+      children: [new D.TextRun({ text: h[0], font: FONT, size: 20, color: 'C0651F', bold: h[1] === 'brand', italics: h[1] === 'i' })]
+    })));
+    kids.push(new D.Paragraph({
+      alignment: D.AlignmentType.CENTER, spacing: { after: 280 },
+      children: [new D.TextRun({ text: model.title.toUpperCase(), font: FONT, size: 34, bold: true })]
+    }));
+    model.lines.forEach(l => {
+      if (l.blank){
+        kids.push(new D.Paragraph({ spacing: { after: 0 }, run: { size: 8 }, children: [new D.TextRun({ text: "", size: 8 })] }));
+        return;
+      }
+      kids.push(new D.Paragraph({
+        spacing: { after: 0, line: 300 },
+        indent: l.indent ? { left: 510 } : undefined,
+        children: l.runs.map(r => new D.TextRun({
+          text: r.t, font: FONT, size: 24, bold: !!r.b, italics: !!r.i,
+          underline: r.u ? {} : undefined, color: (r.c && r.c !== '000000') ? r.c : undefined
+        }))
+      }));
+    });
+    return new D.Document({
+      creator: 'The Cake Lab', title: model.title,
+      sections: [{
+        properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1020, bottom: 1020, left: 1247, right: 1247 } } },
+        children: kids
+      }]
+    });
+  }
+
+  document.getElementById('offerWordBtn').addEventListener('click', async () => {
+    if (!OFFER_TPL){ showToast('Mẫu thư chưa tải xong.'); return; }
+    const model = olBuildModel();
+    try {
+      if (!window.docx) throw new Error('docx-lib');
+      const blob = await window.docx.Packer.toBlob(olBuildDocx(model));
+      olDownload(blob, olFileName('docx'));
+    } catch (err){
+      // Dự phòng: không tải được thư viện Word -> xuất file .doc (HTML) mở được bằng Word
+      const css = document.getElementById('offerPaperCss').textContent;
+      const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>' + css +
+        '.ol-paper{box-shadow:none;width:auto;padding:0}</style></head><body><div class="ol-paper">' + olPaperHtml(model) + '</div></body></html>';
+      olDownload(new Blob(['﻿', html], { type: 'application/msword' }), olFileName('doc'));
+      showToast('Đã xuất file .doc (không tải được thư viện .docx).');
+    }
+  });
 </script>
 
 </body>
