@@ -1112,8 +1112,8 @@
         <div class="stage-fields">
           <div class="detail-field view-mode"><label>Tệp phiếu đánh giá</label><div class="val" id="viewDanhGiaFile">Chưa có</div></div>
           <div class="detail-field edit-mode" style="display:none">
-            <label>Tệp phiếu đánh giá (PDF)</label>
-            <input type="file" id="editDanhGiaFile" accept="application/pdf">
+            <label>Tệp phiếu đánh giá (PDF hoặc ảnh)</label>
+            <input type="file" id="editDanhGiaFile" accept="application/pdf,image/*">
             <div class="edit-file-current" id="currentDanhGiaFile"></div>
           </div>
         </div>
@@ -2008,7 +2008,7 @@
 
       if (danhGiaFile && !REMOVE_DANHGIA){
         payload.danhGiaFileName = danhGiaFile.name;
-        payload.danhGiaMimeType = danhGiaFile.type || 'application/pdf';
+        payload.danhGiaMimeType = danhGiaFile.type || 'application/octet-stream';
         payload.danhGiaBase64 = await fileToBase64(danhGiaFile);
       }
       if (offerFile && !REMOVE_OFFER){
