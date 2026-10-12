@@ -834,7 +834,9 @@
   .ol-paper{width:210mm;max-width:none;margin:0 auto;background:#fff;color:#000;box-sizing:border-box;
     padding:18mm 20mm 20mm;font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.45;
     box-shadow:0 4px 18px rgba(0,0,0,.18);}
-  .ol-head{text-align:right;color:#C0651F;font-size:10pt;line-height:1.5;margin-bottom:14mm;}
+  .ol-headrow{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm;margin-bottom:14mm;}
+  .ol-company{flex:0 0 68mm;text-align:left;font-weight:700;font-size:11pt;line-height:1.45;text-transform:uppercase;color:#000;}
+  .ol-head{text-align:right;color:#C0651F;font-size:10pt;line-height:1.5;margin-bottom:0;}
   .ol-head .ol-brand{font-weight:700;}
   .ol-head .ol-i{font-style:italic;}
   .ol-title{text-align:center;font-weight:700;font-size:17pt;letter-spacing:.02em;margin:0 0 7mm;text-transform:uppercase;}
@@ -2267,6 +2269,7 @@
   // Ô nhập được SINH TỰ ĐỘNG theo các placeholder [..] có trong mẫu,
   // nên sửa mẫu trong Sheet thì form + thư tự đổi theo.
   // ============================================================
+  const OFFER_COMPANY = 'CÔNG TY CỔ PHẦN BÁNH NGỌT THE CAKE LAB';
   const OFFER_HEAD = [
     ['Recruitment Team @The Cake Lab', 'brand'],
     ['E: thecakelab.recruitment@gmail.com', 'i'],
@@ -2493,8 +2496,8 @@
   }
 
   function olPaperHtml(model){
-    const head = '<div class="ol-head">' + OFFER_HEAD.map(h =>
-      '<div class="' + (h[1] === 'brand' ? 'ol-brand' : 'ol-i') + '">' + olEsc(h[0]) + '</div>').join('') + '</div>';
+    const head = '<div class="ol-headrow"><div class="ol-company">' + olEsc(OFFER_COMPANY) + '</div><div class="ol-head">' + OFFER_HEAD.map(h =>
+      '<div class="' + (h[1] === 'brand' ? 'ol-brand' : 'ol-i') + '">' + olEsc(h[0]) + '</div>').join('') + '</div></div>';
     const body = model.lines.map(l => l.blank
       ? '<p class="ol-p ol-blank"></p>'
       : '<p class="ol-p' + (l.indent ? ' ol-indent' : '') + '">' + olRunsHtml(l) + '</p>').join('');
@@ -2638,6 +2641,8 @@
     const head = Array.from(paper.querySelectorAll('.ol-head > div')).map(d => ({
       t: d.textContent.replace(/ /g, ' '), brand: d.classList.contains('ol-brand')
     }));
+    const companyEl = paper.querySelector('.ol-company');
+    const company = companyEl ? companyEl.textContent.replace(/\u00a0/g, ' ').trim() : OFFER_COMPANY;
     const titleEl = paper.querySelector('.ol-title');
     const title = titleEl ? titleEl.textContent.trim() : OFFER_TPL.title;
     const lines = [];
@@ -2661,7 +2666,7 @@
       });
     }
     Array.from(paper.children).forEach(el => {
-      if (el.classList.contains('ol-head') || el.classList.contains('ol-title')) return;
+      if (el.classList.contains('ol-headrow') || el.classList.contains('ol-head') || el.classList.contains('ol-title')) return;
       const indent = el.classList.contains('ol-indent') || /padding-left|margin-left/.test(el.getAttribute('style') || '');
       cur = { runs: [], indent: indent }; lines.push(cur);
       walk(el, { b: false, i: false, u: false, c: '' });
@@ -2669,17 +2674,30 @@
     lines.forEach(l => { l.blank = !l.runs.some(r => r.t.trim()); if (l.blank) l.runs = []; });
     const clean = [];
     lines.forEach(l => { if (l.blank && clean.length && clean[clean.length - 1].blank) return; clean.push(l); });
-    return { title: title, head: head, lines: clean };
+    return { title: title, company: company, head: head, lines: clean };
   }
 
   function olBuildDocx(model){
     const D = window.docx, FONT = 'Times New Roman';
     const kids = [];
-    model.head.forEach((h, idx) => kids.push(new D.Paragraph({
+    const NB = { style: D.BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    const noBorders = { top: NB, bottom: NB, left: NB, right: NB };
+    const headParas = model.head.map(h => new D.Paragraph({
       alignment: D.AlignmentType.RIGHT,
-      spacing: { after: idx === model.head.length - 1 ? 520 : 0 },
       children: [new D.TextRun({ text: h.t, font: FONT, size: 20, color: 'C0651F', bold: h.brand, italics: !h.brand })]
-    })));
+    }));
+    kids.push(new D.Table({
+      width: { size: 9412, type: D.WidthType.DXA },
+      columnWidths: [4000, 5412],
+      borders: { top: NB, bottom: NB, left: NB, right: NB, insideHorizontal: NB, insideVertical: NB },
+      rows: [new D.TableRow({ children: [
+        new D.TableCell({ width: { size: 4000, type: D.WidthType.DXA }, borders: noBorders, children: [new D.Paragraph({
+          children: [new D.TextRun({ text: (model.company || OFFER_COMPANY).toUpperCase(), font: FONT, size: 22, bold: true })]
+        })] }),
+        new D.TableCell({ width: { size: 5412, type: D.WidthType.DXA }, borders: noBorders, children: headParas })
+      ] })]
+    }));
+    kids.push(new D.Paragraph({ spacing: { after: 360 }, children: [new D.TextRun({ text: '', size: 12 })] }));
     kids.push(new D.Paragraph({
       alignment: D.AlignmentType.CENTER, spacing: { after: 280 },
       children: [new D.TextRun({ text: model.title.toUpperCase(), font: FONT, size: 34, bold: true })]
