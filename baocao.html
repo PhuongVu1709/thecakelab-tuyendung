@@ -1953,6 +1953,23 @@
     document.getElementById('detailEditBtn').style.display = '';
   }
 
+  // Ảnh chụp từ điện thoại thường 3–10MB → thu nhỏ (cạnh dài tối đa 1800px, JPEG) trước khi tải lên để lưu nhanh hơn rất nhiều.
+  async function compressImageIfNeeded(file){
+    if (!file || !/^image\/(jpeg|png|webp|heic|heif|bmp)/i.test(file.type) || file.size < 400 * 1024) return file;
+    try {
+      const bmp = await createImageBitmap(file);
+      const scale = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(bmp.width * scale); canvas.height = Math.round(bmp.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.82));
+      if (!blob || blob.size >= file.size) return file;
+      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+    } catch (e){ return file; }
+  }
+
   function fileToBase64(file){
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1974,8 +1991,11 @@
     saveBtn.textContent = 'Đang lưu...';
 
     try {
-      const danhGiaFile = document.getElementById('editDanhGiaFile').files[0];
-      const offerFile = document.getElementById('editOfferFile').files[0];
+      let danhGiaFile = document.getElementById('editDanhGiaFile').files[0];
+      let offerFile = document.getElementById('editOfferFile').files[0];
+      if (danhGiaFile || offerFile) saveBtn.textContent = 'Đang xử lý tệp...';
+      danhGiaFile = await compressImageIfNeeded(danhGiaFile);
+      offerFile = await compressImageIfNeeded(offerFile);
 
       const payload = {
         action: 'updateApplicantStage',
@@ -2017,6 +2037,7 @@
         payload.offerBase64 = await fileToBase64(offerFile);
       }
 
+      saveBtn.textContent = (payload.danhGiaBase64 || payload.offerBase64) ? 'Đang tải tệp lên...' : 'Đang lưu...';
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
