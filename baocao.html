@@ -2892,7 +2892,7 @@
       document.getElementById('emailModalTitle').textContent = 'Gửi email thư mời nhận việc (Offer)';
       document.getElementById('emailExtra').style.display = '';
       ofRenderFields(document.getElementById('ofEmailFields'),
-        ofCollect([OFE.tpl.emailSubject, OFE.tpl.emailBody, OFE.tpl.signature]), () => ofRefreshEmail(false));
+        ofCollect([OFE.tpl.emailSubject, OFE.tpl.emailBody, OFE.tpl.signature]).filter(f => f.key !== 'hạn phản hồi'), () => ofRefreshEmail(false));
       document.getElementById('emailTo').value = a.email || '';
       ofRefreshEmail(true);
       const row = document.getElementById('ofAttachRow'), chk = document.getElementById('ofAttachChk');
