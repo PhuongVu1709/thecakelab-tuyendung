@@ -696,6 +696,22 @@
   }
   .interview-btn:hover{background:var(--blue-tint);}
 
+  #offerMsgModal .modal-card{max-width:1000px;width:96vw;max-height:90vh;}
+  #offerMsgModal .modal-body{max-height:calc(90vh - 130px);}
+  .of-msg-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;}
+  .of-col-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .of-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px;}
+  .of-grid.one{grid-template-columns:1fr;max-height:62vh;overflow:auto;padding-right:4px;}
+  .of-f label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px;}
+  .of-f input{width:100%;box-sizing:border-box;font-family:'Inter',sans-serif;font-size:14px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;background:var(--white);}
+  .of-f input:focus{border-color:var(--orange);}
+  .of-msg-text{width:100%;box-sizing:border-box;min-height:56vh;font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;border:1.5px solid var(--line);border-radius:10px;padding:12px;outline:none;resize:vertical;}
+  .of-msg-text:focus{border-color:var(--orange);}
+  .of-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--ink-soft);}
+  .of-actions .ol-hint.edited{color:var(--orange-dark);font-weight:600;}
+  .of-attach{margin:4px 0 6px;font-size:13.5px;}
+  .of-attach label{font-weight:700;color:var(--blue);margin-right:6px;}
+  @media (max-width:820px){.of-msg-layout{grid-template-columns:1fr;}}
   /* ---------- THƯ MỜI NHẬN VIỆC ---------- */
   .offer-page-title{font-family:'Be Vietnam Pro',sans-serif;font-weight:800;font-size:20px;color:var(--ink);}
   .offer-layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start;}
@@ -1129,7 +1145,11 @@
           </div>
 
           <div class="detail-field" style="align-self:flex-end">
-            <button type="button" class="interview-btn" id="btnOfferLetter">📄 Thư mời nhận việc</button>
+            <div class="interview-action-buttons">
+              <button type="button" class="interview-btn" id="btnOfferLetter">📄 Thư mời nhận việc</button>
+              <button type="button" class="interview-btn" id="btnOfferMessage">📩 Gửi tin nhắn</button>
+              <button type="button" class="interview-btn" id="btnOfferEmail">📧 Gửi email</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1189,14 +1209,49 @@
   </div>
 </div>
 
+<!-- Gửi tin nhắn (Offer) -->
+<div class="modal-overlay" id="offerMsgModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h4>Gửi tin nhắn thư mời nhận việc (Offer)</h4>
+      <button class="modal-close" id="offerMsgModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="of-msg-layout">
+        <div>
+          <div class="of-col-title">Thông tin điền vào tin nhắn</div>
+          <div class="of-grid one" id="ofMsgFields"></div>
+        </div>
+        <div>
+          <div class="of-col-title">Nội dung tin nhắn</div>
+          <textarea id="ofMsgText" class="of-msg-text"></textarea>
+          <div class="of-actions"><button type="button" class="detail-edit-btn" id="ofMsgSync">↺ Đồng bộ lại</button><span class="ol-hint" id="ofMsgHint"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="detail-edit-btn" id="offerMsgModalCancel">Đóng</button>
+      <button type="button" class="detail-save-btn" id="ofMsgCopy">📋 Sao chép nội dung</button>
+    </div>
+  </div>
+</div>
+
 <!-- Gửi email -->
 <div class="modal-overlay" id="emailModal">
   <div class="modal-card">
     <div class="modal-header">
-      <h4>Gửi email mời phỏng vấn</h4>
+      <h4 id="emailModalTitle">Gửi email mời phỏng vấn</h4>
       <button class="modal-close" id="emailModalClose">✕</button>
     </div>
     <div class="modal-body">
+      <div id="emailExtra" style="display:none">
+        <div class="email-field">
+          <label>Thông tin điền vào thư</label>
+          <div class="of-grid" id="ofEmailFields"></div>
+        </div>
+        <div class="of-attach"><label><input type="checkbox" id="ofAttachChk" checked> Đính kèm</label> <span id="ofAttachRow"></span></div>
+        <div class="of-actions"><button type="button" class="detail-edit-btn" id="ofEmailSync">↺ Đồng bộ lại từ ô thông tin</button><span class="ol-hint" id="ofEmailHint"></span></div>
+      </div>
       <div class="email-field">
         <label>Email người gửi</label>
         <select id="emailFrom">
@@ -2079,6 +2134,7 @@
   });
 
   // --- Gửi email (giữ đúng định dạng đậm/nghiêng/màu từ mẫu Sheet) ---
+  let EMAIL_MODE = 'interview';
   document.getElementById('btnSendEmail').addEventListener('click', async () => {
     const ctx = getInterviewBaseContext();
     if (!validateInterviewBase(ctx)) return;
@@ -2091,6 +2147,9 @@
       const subject = fillInterviewTemplate(tpl.emailSubject, ctx);
       const bodyHtml = fillInterviewTemplate(tpl.emailBodyHtml, ctx) + '<br><br>' + fillInterviewTemplate(tpl.signatureHtml, ctx);
 
+      EMAIL_MODE = 'interview';
+      document.getElementById('emailModalTitle').textContent = 'Gửi email mời phỏng vấn';
+      document.getElementById('emailExtra').style.display = 'none';
       document.getElementById('emailTo').value = a.email || '';
       document.getElementById('emailSubjectPreview').value = subject;
       document.getElementById('emailBodyPreview').innerHTML = bodyHtml;
@@ -2115,6 +2174,8 @@
     sendBtn.disabled = true;
     sendBtn.textContent = 'Đang gửi...';
 
+    if (EMAIL_MODE === 'offer' && !document.getElementById('ofAttachChk').checked && !confirm('Email chưa kèm tệp thư offer. Vẫn gửi?')) return;
+
     try {
       const subject = document.getElementById('emailSubjectPreview').value.trim();
       const bodyHtml = document.getElementById('emailBodyPreview').innerHTML;
@@ -2132,16 +2193,19 @@
           toEmail: toEmail,
           subject: subject,
           body: bodyText,
-          bodyHtml: bodyHtml
+          bodyHtml: bodyHtml,
+          attachmentUrl: (EMAIL_MODE === 'offer' && document.getElementById('ofAttachChk').checked) ? (a.offerUrl || '') : ''
         })
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Gửi email thất bại');
 
-      a.thoiGianPhanHoi = json.thoiGianPhanHoi;
-      setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
+      if (json.thoiGianPhanHoi !== undefined){
+        a.thoiGianPhanHoi = json.thoiGianPhanHoi;
+        setText('viewThoiGianPhanHoi', a.thoiGianPhanHoi);
+      }
       document.getElementById('emailModal').classList.remove('open');
-      showToast(json.warning ? json.warning : 'Đã gửi email mời phỏng vấn.');
+      showToast(json.warning ? json.warning : (EMAIL_MODE === 'offer' ? 'Đã gửi email thư mời nhận việc.' : 'Đã gửi email mời phỏng vấn.'));
     } catch (err){
       showToast('Lỗi khi gửi email: ' + err.message);
     } finally {
@@ -2174,7 +2238,7 @@
     ['P: 086 988 6287', 'i'],
     ['A: Tầng 4, 26 Trung Hoà, Cầu Giấy, Hà Nội', 'i']
   ];
-  const OFFER_ALIASES = { 'vị trí tuyển dụng': 'vị trí', 'vị trí ứng tuyển': 'vị trí' };
+  const OFFER_ALIASES = { 'vị trí tuyển dụng': 'vị trí', 'vị trí ứng tuyển': 'vị trí', 'ngày nhận việc dự kiến': 'ngày bắt đầu làm việc', 'thời gian xác nhận': 'hạn phản hồi' };
   const OFFER_CANDIDATE_KEYS = ['tên ứng viên', 'vị trí', 'bộ phận'];
   const OFFER_REMEMBER = ['phụ cấp ăn ca', 'phụ cấp chuyên cần', 'thời gian làm việc', 'số tháng thử việc'];
   const OFFER_HINTS = {
@@ -2623,6 +2687,165 @@
       olDownload(new Blob(['﻿', html], { type: 'application/msword' }), olFileName('doc'));
       showToast('Đã xuất file .doc (không tải được thư viện .docx).');
     }
+  });
+
+  // ============================================================
+  // OFFER — Gửi tin nhắn / Gửi email (mẫu lấy từ tab "MẪU THƯ OFFER")
+  // Ô nhập được sinh theo placeholder [..] có trong mẫu; giá trị dùng chung với "Thư mời nhận việc".
+  // ============================================================
+  function ofFieldType(key){ return key === 'giờ' ? 'time' : (olIsDate(key) ? 'date' : 'text'); }
+
+  function ofCollect(texts){
+    const seen = {}, fields = [];
+    texts.forEach(t => {
+      OFFER_PH_RE.lastIndex = 0; let m;
+      while ((m = OFFER_PH_RE.exec(t || ''))){
+        const label = m[1].trim(), key = olKey(label);
+        if (seen[key]) continue; seen[key] = true;
+        fields.push({ key: key, label: key === 'vị trí' ? 'Vị trí' : label, type: ofFieldType(key) });
+      }
+    });
+    return fields;
+  }
+
+  function ofEnsureValues(a){
+    if (OFFER_CODE !== a.maCV || !OFFER_VALUES_BY_CODE[a.maCV]){ OFFER_CODE = a.maCV; olSeedValues(a); }
+    else OFFER_VALUES = OFFER_VALUES_BY_CODE[a.maCV];
+    if (!OFFER_VALUES['bộ phận'] && a.phongBan) OFFER_VALUES['bộ phận'] = a.phongBan;
+  }
+
+  function ofValue(key){
+    let v = String(OFFER_VALUES[key] || '').trim();
+    if (ofFieldType(key) === 'date'){
+      const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) v = m[3] + '/' + m[2] + '/' + m[1];
+    }
+    return v;
+  }
+
+  // Điền placeholder theo từng dòng. Dòng mà MỌI ô đều trống thì bỏ cả dòng; dòng có ô trống lẫn ô có giá trị thì ô trống thành rỗng.
+  function ofFillLines(lines, esc){
+    const out = [];
+    lines.forEach(line => {
+      OFFER_PH_RE.lastIndex = 0;
+      const has = OFFER_PH_RE.test(line);
+      if (!has){ out.push(line); return; }
+      let anyVal = false;
+      const filled = line.replace(OFFER_PH_RE, (m0, label) => {
+        const v = ofValue(olKey(label));
+        if (v) anyVal = true;
+        return v ? (esc ? olEsc(v) : v) : '';
+      });
+      if (anyVal) out.push(filled.replace(/\s+$/, ''));
+    });
+    const clean = [];
+    out.forEach(l => { if (!l.trim() && clean.length && !clean[clean.length - 1].trim()) return; clean.push(l); });
+    return clean;
+  }
+  function ofFillText(text){ return ofFillLines(String(text || '').split('\n'), false).join('\n').trim(); }
+  function ofFillHtml(html){ return ofFillLines(String(html || '').split(/<br\s*\/?>/i), true).join('<br>'); }
+
+  function ofRenderFields(box, fields, onChange){
+    box.innerHTML = fields.map(f =>
+      '<div class="of-f"><label>' + olEsc(f.label) + '</label><input type="' + f.type + '" data-key="' + olEsc(f.key) +
+      '" value="' + olEsc(OFFER_VALUES[f.key] || '') + '" placeholder="' + olEsc(OFFER_HINTS[f.key] || '') + '"></div>').join('') ||
+      '<div class="offer-state">Mẫu không có ô [thông tin] nào cần nhập.</div>';
+    box.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+      const key = inp.dataset.key;
+      if (olIsMoney(key)){ const f = olFormatMoney(inp.value); if (f !== inp.value) inp.value = f; }
+      OFFER_VALUES[key] = inp.value;
+      olSaveDefault(key, inp.value);
+      onChange();
+    }));
+  }
+
+  async function ofGetTemplates(){
+    const res = await fetch(APPS_SCRIPT_URL + '?action=offerTemplates&_=' + Date.now());
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Không tải được mẫu thư offer');
+    return json;
+  }
+
+  // --- Tin nhắn ---
+  const OFM = { tpl: null, manual: false, warned: false };
+  function ofMsgHint(){
+    const h = document.getElementById('ofMsgHint');
+    h.textContent = OFM.manual ? '✏️ Bạn đã sửa tay tin nhắn — đổi ô bên trái sẽ không tự cập nhật. Bấm "Đồng bộ lại" để tạo lại.' : '✏️ Có thể sửa trực tiếp nội dung tin nhắn.';
+    h.classList.toggle('edited', OFM.manual);
+  }
+  function ofRefreshMessage(force){
+    if (OFM.manual && !force){
+      if (!OFM.warned){ OFM.warned = true; showToast('Tin nhắn đã được sửa tay nên không tự cập nhật. Bấm "Đồng bộ lại" để cập nhật.'); }
+      return;
+    }
+    OFM.manual = false; OFM.warned = false;
+    document.getElementById('ofMsgText').value = ofFillText(OFM.tpl.message);
+    ofMsgHint();
+  }
+  document.getElementById('btnOfferMessage').addEventListener('click', async () => {
+    const a = findCurrentApplicant(); if (!a) return;
+    try {
+      ofEnsureValues(a);
+      OFM.tpl = await ofGetTemplates();
+      ofRenderFields(document.getElementById('ofMsgFields'), ofCollect([OFM.tpl.message]), () => ofRefreshMessage(false));
+      ofRefreshMessage(true);
+      document.getElementById('offerMsgModal').classList.add('open');
+    } catch (err){ showToast('Lỗi: ' + err.message); }
+  });
+  document.getElementById('ofMsgText').addEventListener('input', () => { if (!OFM.manual){ OFM.manual = true; ofMsgHint(); } });
+  document.getElementById('ofMsgSync').addEventListener('click', () => ofRefreshMessage(true));
+  ['offerMsgModalClose', 'offerMsgModalCancel'].forEach(id => document.getElementById(id).addEventListener('click', () => document.getElementById('offerMsgModal').classList.remove('open')));
+  document.getElementById('offerMsgModal').addEventListener('click', e => { if (e.target.id === 'offerMsgModal') e.currentTarget.classList.remove('open'); });
+  document.getElementById('ofMsgCopy').addEventListener('click', async () => {
+    const ta = document.getElementById('ofMsgText');
+    try { await navigator.clipboard.writeText(ta.value); } catch (err){ ta.select(); document.execCommand('copy'); }
+    showToast('Đã sao chép nội dung tin nhắn.');
+  });
+
+  // --- Email (dùng chung hộp thoại email với Phỏng vấn) ---
+  const OFE = { tpl: null, manual: false, warned: false };
+  function ofEmailHint(){
+    const h = document.getElementById('ofEmailHint');
+    h.textContent = OFE.manual ? '✏️ Bạn đã sửa tay email — đổi ô thông tin sẽ không tự cập nhật. Bấm "Đồng bộ lại" để tạo lại.' : '';
+    h.classList.toggle('edited', OFE.manual);
+  }
+  function ofRefreshEmail(force){
+    if (OFE.manual && !force){
+      if (!OFE.warned){ OFE.warned = true; showToast('Email đã được sửa tay nên không tự cập nhật. Bấm "Đồng bộ lại" để cập nhật.'); }
+      return;
+    }
+    OFE.manual = false; OFE.warned = false;
+    document.getElementById('emailSubjectPreview').value = ofFillText(OFE.tpl.emailSubject);
+    document.getElementById('emailBodyPreview').innerHTML = ofFillHtml(OFE.tpl.emailBodyHtml) + '<br><br>' + ofFillHtml(OFE.tpl.signatureHtml);
+    ofEmailHint();
+  }
+  ['emailSubjectPreview', 'emailBodyPreview'].forEach(id => document.getElementById(id).addEventListener('input', () => {
+    if (EMAIL_MODE === 'offer' && !OFE.manual){ OFE.manual = true; ofEmailHint(); }
+  }));
+  document.getElementById('ofEmailSync').addEventListener('click', () => ofRefreshEmail(true));
+
+  document.getElementById('btnOfferEmail').addEventListener('click', async () => {
+    const a = findCurrentApplicant(); if (!a) return;
+    try {
+      ofEnsureValues(a);
+      OFE.tpl = await ofGetTemplates();
+      EMAIL_MODE = 'offer';
+      document.getElementById('emailModalTitle').textContent = 'Gửi email thư mời nhận việc (Offer)';
+      document.getElementById('emailExtra').style.display = '';
+      ofRenderFields(document.getElementById('ofEmailFields'),
+        ofCollect([OFE.tpl.emailSubject, OFE.tpl.emailBody, OFE.tpl.signature]), () => ofRefreshEmail(false));
+      document.getElementById('emailTo').value = a.email || '';
+      ofRefreshEmail(true);
+      const row = document.getElementById('ofAttachRow'), chk = document.getElementById('ofAttachChk');
+      if (a.offerUrl){
+        row.innerHTML = '📎 Tệp đính kèm (Tệp thư offer): ' + fileLinksHtml(a.offerUrl);
+        chk.checked = true; chk.disabled = false;
+      } else {
+        row.innerHTML = '⚠️ Chưa có "Tệp thư offer" — hãy tải lên ở chế độ Chỉnh sửa để đính kèm. Email sẽ gửi không kèm tệp.';
+        chk.checked = false; chk.disabled = true;
+      }
+      document.getElementById('emailModal').classList.add('open');
+    } catch (err){ showToast('Lỗi: ' + err.message); }
   });
 </script>
 
