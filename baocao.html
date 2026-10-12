@@ -697,7 +697,7 @@
   .offer-page-title{font-family:'Be Vietnam Pro',sans-serif;font-weight:800;font-size:20px;color:var(--ink);}
   .offer-layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start;}
   .offer-form{display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 130px);overflow:auto;padding-right:4px;}
-  .offer-form .detail-card{margin-bottom:0;}
+  .offer-form .detail-card{margin-bottom:0;flex:none;}
   .offer-fields{padding:6px 18px 16px;display:flex;flex-direction:column;gap:12px;}
   .offer-fields label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px;}
   .offer-fields input,.offer-fields textarea{
@@ -706,6 +706,13 @@
   }
   .offer-fields input:focus,.offer-fields textarea:focus{border-color:var(--orange);}
   .offer-preview{background:#E9E3DA;border-radius:14px;padding:22px;max-height:calc(100vh - 130px);overflow:auto;}
+  .offer-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 auto 12px;max-width:210mm;font-size:12.5px;color:var(--ink-soft);}
+  .offer-toolbar button{border:1.5px solid var(--blue);background:var(--white);color:var(--blue);font-weight:700;font-size:13px;border-radius:8px;padding:5px 11px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .offer-toolbar button:hover{background:var(--blue-tint);}
+  .offer-toolbar .ol-hint{flex:1;min-width:200px;}
+  .offer-toolbar .ol-hint.edited{color:var(--orange-dark);font-weight:600;}
+  #offerPaper{outline:none;}
+  #offerPaper:focus{box-shadow:0 0 0 2px var(--orange),0 4px 18px rgba(0,0,0,.18);}
   .offer-state{padding:30px 10px;text-align:center;color:var(--ink-soft);font-size:14px;}
   @media (max-width:980px){
     .offer-layout{grid-template-columns:1fr;}
@@ -1146,7 +1153,16 @@
     </div>
     <div class="offer-layout">
       <div class="offer-form" id="offerForm"><div class="offer-state">Đang tải mẫu…</div></div>
-      <div class="offer-preview"><div class="ol-paper" id="offerPaper"></div></div>
+      <div class="offer-preview">
+        <div class="offer-toolbar">
+          <button type="button" data-cmd="bold" title="In đậm (Ctrl+B)"><b>B</b></button>
+          <button type="button" data-cmd="italic" title="In nghiêng (Ctrl+I)"><i>I</i></button>
+          <button type="button" data-cmd="underline" title="Gạch chân (Ctrl+U)"><u>U</u></button>
+          <button type="button" id="offerSyncBtn" title="Bỏ phần đã sửa tay, tạo lại thư từ form bên trái">↺ Đồng bộ lại từ form</button>
+          <span class="ol-hint" id="offerHint">✏️ Bấm vào thư để sửa/thêm nội dung trực tiếp.</span>
+        </div>
+        <div class="ol-paper" id="offerPaper" contenteditable="true" spellcheck="false"></div>
+      </div>
     </div>
   </div>
 
@@ -2273,9 +2289,49 @@
     return v;
   }
 
-  // Ghép mẫu + dữ liệu => model dùng chung cho xem trước / Word / PDF
+  // Cắt các run tại các vị trí (ký tự) cho trước
+  function olSplitRuns(runs, cuts){
+    const out = []; let pos = 0;
+    runs.forEach(r => {
+      const s0 = pos, e0 = pos + r.t.length; pos = e0;
+      if (!r.t){ out.push(Object.assign({}, r)); return; }
+      const pts = [0, r.t.length];
+      cuts.forEach(x => { if (x > s0 && x < e0) pts.push(x - s0); });
+      pts.sort((x, y) => x - y);
+      for (let i = 0; i < pts.length - 1; i++){
+        if (pts[i] === pts[i + 1]) continue;
+        out.push(Object.assign({}, r, { t: r.t.slice(pts[i], pts[i + 1]) }));
+      }
+    });
+    return out;
+  }
+
+  // Ô để trống => bỏ luôn phần đó khỏi thư: dòng chỉ có 1 ô trống thì bỏ cả dòng;
+  // dòng có nhiều cụm (cách nhau ≥3 khoảng trắng, vd "Chức vụ: .. Bộ phận: ..") thì chỉ bỏ cụm có ô trống.
+  function olDropEmpty(line){
+    if (!line.runs.some(r => r.k === 'empty')) return line;
+    const text = line.runs.map(r => r.t).join('');
+    const cuts = [], gaps = []; let m; const re = /\s{3,}/g;
+    while ((m = re.exec(text))){ cuts.push(m.index, m.index + m[0].length); gaps.push([m.index, m.index + m[0].length]); }
+    const runs = olSplitRuns(line.runs, cuts);
+    let pos = 0; const segs = [[]];
+    runs.forEach(r => {
+      const st = pos; pos += r.t.length;
+      const inGap = gaps.some(g => st >= g[0] && st < g[1]);
+      if (inGap){ segs.push([]); return; }
+      segs[segs.length - 1].push(r);
+    });
+    const kept = segs.filter(sg => sg.length && !sg.some(r => r.k === 'empty'));
+    if (!kept.length) return null;
+    const out = [];
+    kept.forEach((sg, i) => { if (i) out.push({ t: '          ', b: false, i: false, u: false, c: '' }); sg.forEach(r => out.push(r)); });
+    if (out.length) out[0].t = out[0].t.replace(/^\s+/, '');
+    return { blank: false, indent: line.indent, runs: out };
+  }
+
+  // Ghép mẫu + dữ liệu => model dùng cho xem trước
   function olBuildModel(){
-    const lines = OFFER_TPL.lines.map(l => ({
+    let lines = OFFER_TPL.lines.map(l => ({
       blank: l.blank, indent: l.indent,
       runs: l.runs.map(r => Object.assign({}, r))
     }));
@@ -2287,7 +2343,7 @@
           if (m.index > last) out.push(Object.assign({}, r, { t: r.t.slice(last, m.index) }));
           const label = m[1].trim(), v = olValueOf(olKey(label));
           if (!v){
-            out.push(Object.assign({}, r, { t: '………………………', k: 'empty' }));
+            out.push(Object.assign({}, r, { t: '', k: 'empty' }));
           } else {
             const up = olNorm(label) === 'tên ứng viên' || olNorm(label) === 'vị trí tuyển dụng';
             out.push(Object.assign({}, r, { t: up ? v.toUpperCase() : v, b: up ? true : r.b, k: 'val' }));
@@ -2298,7 +2354,11 @@
       });
       l.runs = out;
     });
-    return { title: OFFER_TPL.title, lines: lines };
+    lines = lines.map(l => l.blank ? l : olDropEmpty(l)).filter(Boolean);
+    const clean = [];
+    lines.forEach(l => { if (l.blank && (!clean.length || clean[clean.length - 1].blank)) return; clean.push(l); });
+    while (clean.length && clean[clean.length - 1].blank) clean.pop();
+    return { title: OFFER_TPL.title, lines: clean };
   }
 
   function olRunsHtml(l){
@@ -2321,10 +2381,28 @@
     return head + '<div class="ol-title">' + olEsc(model.title) + '</div>' + body;
   }
 
-  function olRenderPreview(){
-    if (!OFFER_TPL) return;
-    document.getElementById('offerPaper').innerHTML = olPaperHtml(olBuildModel());
+  let OFFER_MANUAL = false, OFFER_WARNED = false;
+  function olSetHint(){
+    const h = document.getElementById('offerHint');
+    if (OFFER_MANUAL){ h.textContent = '✏️ Bạn đã sửa tay thư — thay đổi ở form bên trái sẽ không tự cập nhật vào thư nữa. Bấm "Đồng bộ lại từ form" nếu muốn tạo lại.'; h.classList.add('edited'); }
+    else { h.textContent = '✏️ Bấm vào thư để sửa/thêm nội dung trực tiếp.'; h.classList.remove('edited'); }
   }
+  function olRenderPreview(force){
+    if (!OFFER_TPL) return;
+    if (OFFER_MANUAL && !force){
+      if (!OFFER_WARNED){ OFFER_WARNED = true; showToast('Thư đã được sửa tay nên không tự cập nhật theo form. Bấm "Đồng bộ lại từ form" để cập nhật.'); }
+      return;
+    }
+    OFFER_MANUAL = false; OFFER_WARNED = false;
+    document.getElementById('offerPaper').innerHTML = olPaperHtml(olBuildModel());
+    olSetHint();
+  }
+  document.getElementById('offerPaper').addEventListener('input', () => { if (!OFFER_MANUAL){ OFFER_MANUAL = true; olSetHint(); } });
+  document.getElementById('offerSyncBtn').addEventListener('click', () => olRenderPreview(true));
+  document.querySelectorAll('.offer-toolbar [data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => { document.getElementById('offerPaper').focus(); document.execCommand(btn.dataset.cmd); });
+  });
 
   function olRenderForm(){
     const box = document.getElementById('offerForm');
@@ -2389,7 +2467,7 @@
       await olLoadTemplate();
       if (reload && OFFER_VALUES_BY_CODE[a.maCV]) OFFER_VALUES = OFFER_VALUES_BY_CODE[a.maCV]; else olSeedValues(a);
       olRenderForm();
-      olRenderPreview();
+      olRenderPreview(true);
     } catch (err){
       document.getElementById('offerForm').innerHTML = '<div class="offer-state">⚠️ ' + olEsc(err.message || err) + '</div>';
     }
@@ -2418,7 +2496,7 @@
     d.open();
     d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + olEsc(olFileName('pdf').replace(/\.pdf$/, '')) + '</title><style>' + css +
       '@page{size:A4;margin:0}html,body{margin:0;background:#fff}.ol-paper{box-shadow:none;width:210mm;min-height:297mm}' +
-      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body><div class="ol-paper">' + olPaperHtml(olBuildModel()) + '</div></body></html>');
+      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body><div class="ol-paper">' + document.getElementById('offerPaper').innerHTML + '</div></body></html>');
     d.close();
     setTimeout(() => {
       try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch (e){ showToast('Không mở được hộp thoại in.'); }
@@ -2434,13 +2512,53 @@
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   }
 
+  // Đọc lại thư ĐANG HIỂN THỊ (kể cả phần HR sửa tay) thành model để xuất Word
+  function olDomToModel(){
+    const paper = document.getElementById('offerPaper');
+    const head = Array.from(paper.querySelectorAll('.ol-head > div')).map(d => ({
+      t: d.textContent.replace(/ /g, ' '), brand: d.classList.contains('ol-brand')
+    }));
+    const titleEl = paper.querySelector('.ol-title');
+    const title = titleEl ? titleEl.textContent.trim() : OFFER_TPL.title;
+    const lines = [];
+    let cur = null;
+    function walk(node, st){
+      node.childNodes.forEach(n => {
+        if (n.nodeType === 3){
+          const t = n.nodeValue.replace(/ /g, ' ');
+          if (t) cur.runs.push(Object.assign({ t: t }, st));
+        } else if (n.nodeName === 'BR'){
+          cur = { runs: [], indent: cur.indent }; lines.push(cur);
+        } else if (n.nodeType === 1){
+          const s = Object.assign({}, st), css = n.style || {};
+          const fw = String(css.fontWeight || '');
+          if (n.nodeName === 'B' || n.nodeName === 'STRONG' || fw === 'bold' || +fw >= 600) s.b = true;
+          if (n.nodeName === 'I' || n.nodeName === 'EM' || css.fontStyle === 'italic') s.i = true;
+          if (n.nodeName === 'U' || String(css.textDecoration || css.textDecorationLine || '').indexOf('underline') >= 0) s.u = true;
+          if (css.color) s.c = olRgbToHex(css.color);
+          walk(n, s);
+        }
+      });
+    }
+    Array.from(paper.children).forEach(el => {
+      if (el.classList.contains('ol-head') || el.classList.contains('ol-title')) return;
+      const indent = el.classList.contains('ol-indent') || /padding-left|margin-left/.test(el.getAttribute('style') || '');
+      cur = { runs: [], indent: indent }; lines.push(cur);
+      walk(el, { b: false, i: false, u: false, c: '' });
+    });
+    lines.forEach(l => { l.blank = !l.runs.some(r => r.t.trim()); if (l.blank) l.runs = []; });
+    const clean = [];
+    lines.forEach(l => { if (l.blank && clean.length && clean[clean.length - 1].blank) return; clean.push(l); });
+    return { title: title, head: head, lines: clean };
+  }
+
   function olBuildDocx(model){
     const D = window.docx, FONT = 'Times New Roman';
     const kids = [];
-    OFFER_HEAD.forEach((h, idx) => kids.push(new D.Paragraph({
+    model.head.forEach((h, idx) => kids.push(new D.Paragraph({
       alignment: D.AlignmentType.RIGHT,
-      spacing: { after: idx === OFFER_HEAD.length - 1 ? 520 : 0 },
-      children: [new D.TextRun({ text: h[0], font: FONT, size: 20, color: 'C0651F', bold: h[1] === 'brand', italics: h[1] === 'i' })]
+      spacing: { after: idx === model.head.length - 1 ? 520 : 0 },
+      children: [new D.TextRun({ text: h.t, font: FONT, size: 20, color: 'C0651F', bold: h.brand, italics: !h.brand })]
     })));
     kids.push(new D.Paragraph({
       alignment: D.AlignmentType.CENTER, spacing: { after: 280 },
@@ -2471,7 +2589,7 @@
 
   document.getElementById('offerWordBtn').addEventListener('click', async () => {
     if (!OFFER_TPL){ showToast('Mẫu thư chưa tải xong.'); return; }
-    const model = olBuildModel();
+    const model = olDomToModel();
     try {
       if (!window.docx) throw new Error('docx-lib');
       const blob = await window.docx.Packer.toBlob(olBuildDocx(model));
@@ -2480,7 +2598,7 @@
       // Dự phòng: không tải được thư viện Word -> xuất file .doc (HTML) mở được bằng Word
       const css = document.getElementById('offerPaperCss').textContent;
       const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>' + css +
-        '.ol-paper{box-shadow:none;width:auto;padding:0}</style></head><body><div class="ol-paper">' + olPaperHtml(model) + '</div></body></html>';
+        '.ol-paper{box-shadow:none;width:auto;padding:0}</style></head><body><div class="ol-paper">' + document.getElementById('offerPaper').innerHTML + '</div></body></html>';
       olDownload(new Blob(['﻿', html], { type: 'application/msword' }), olFileName('doc'));
       showToast('Đã xuất file .doc (không tải được thư viện .docx).');
     }
