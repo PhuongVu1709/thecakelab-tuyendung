@@ -835,7 +835,7 @@
     padding:18mm 20mm 20mm;font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.45;
     box-shadow:0 4px 18px rgba(0,0,0,.18);}
   .ol-headrow{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm;margin-bottom:14mm;}
-  .ol-company{flex:0 0 68mm;text-align:left;font-weight:700;font-size:11pt;line-height:1.45;text-transform:uppercase;color:#000;}
+  .ol-company{flex:0 0 auto;text-align:center;white-space:nowrap;font-weight:700;font-size:11pt;line-height:1.45;text-transform:uppercase;color:#000;}
   .ol-head{text-align:right;color:#C0651F;font-size:10pt;line-height:1.5;margin-bottom:0;}
   .ol-head .ol-brand{font-weight:700;}
   .ol-head .ol-i{font-style:italic;}
@@ -2269,7 +2269,7 @@
   // Ô nhập được SINH TỰ ĐỘNG theo các placeholder [..] có trong mẫu,
   // nên sửa mẫu trong Sheet thì form + thư tự đổi theo.
   // ============================================================
-  const OFFER_COMPANY = 'CÔNG TY CỔ PHẦN BÁNH NGỌT THE CAKE LAB';
+  const OFFER_COMPANY = ['CÔNG TY CỔ PHẦN BÁNH NGỌT', 'THE CAKE LAB']; // dòng 2 căn giữa dưới dòng 1
   const OFFER_HEAD = [
     ['Recruitment Team @The Cake Lab', 'brand'],
     ['E: thecakelab.recruitment@gmail.com', 'i'],
@@ -2496,7 +2496,7 @@
   }
 
   function olPaperHtml(model){
-    const head = '<div class="ol-headrow"><div class="ol-company">' + olEsc(OFFER_COMPANY) + '</div><div class="ol-head">' + OFFER_HEAD.map(h =>
+    const head = '<div class="ol-headrow"><div class="ol-company">' + OFFER_COMPANY.map(l => '<div>' + olEsc(l) + '</div>').join('') + '</div><div class="ol-head">' + OFFER_HEAD.map(h =>
       '<div class="' + (h[1] === 'brand' ? 'ol-brand' : 'ol-i') + '">' + olEsc(h[0]) + '</div>').join('') + '</div></div>';
     const body = model.lines.map(l => l.blank
       ? '<p class="ol-p ol-blank"></p>'
@@ -2642,7 +2642,12 @@
       t: d.textContent.replace(/ /g, ' '), brand: d.classList.contains('ol-brand')
     }));
     const companyEl = paper.querySelector('.ol-company');
-    const company = companyEl ? companyEl.textContent.replace(/\u00a0/g, ' ').trim() : OFFER_COMPANY;
+    let company = OFFER_COMPANY;
+    if (companyEl){
+      const parts = Array.from(companyEl.children).map(d => d.textContent.replace(/\u00a0/g, ' ').trim()).filter(Boolean);
+      company = parts.length ? parts : [companyEl.textContent.replace(/\u00a0/g, ' ').trim()].filter(Boolean);
+      if (!company.length) company = OFFER_COMPANY;
+    }
     const titleEl = paper.querySelector('.ol-title');
     const title = titleEl ? titleEl.textContent.trim() : OFFER_TPL.title;
     const lines = [];
@@ -2691,9 +2696,10 @@
       columnWidths: [4000, 5412],
       borders: { top: NB, bottom: NB, left: NB, right: NB, insideHorizontal: NB, insideVertical: NB },
       rows: [new D.TableRow({ children: [
-        new D.TableCell({ width: { size: 4000, type: D.WidthType.DXA }, borders: noBorders, children: [new D.Paragraph({
-          children: [new D.TextRun({ text: (model.company || OFFER_COMPANY).toUpperCase(), font: FONT, size: 22, bold: true })]
-        })] }),
+        new D.TableCell({ width: { size: 4000, type: D.WidthType.DXA }, borders: noBorders, children: (model.company || OFFER_COMPANY).map(l => new D.Paragraph({
+          alignment: D.AlignmentType.CENTER,
+          children: [new D.TextRun({ text: l.toUpperCase(), font: FONT, size: 22, bold: true })]
+        })) }),
         new D.TableCell({ width: { size: 5412, type: D.WidthType.DXA }, borders: noBorders, children: headParas })
       ] })]
     }));
