@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <style>
   :root{
     --orange:#F37021;
@@ -1333,6 +1333,7 @@
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
+    clearApplicantsCache();
     document.getElementById('dashboard').classList.remove('show');
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('loginForm').reset();
@@ -1354,6 +1355,12 @@
     { maCV:'CV008', thoiGianGui:'2026-09-15', hoTen:'Hoàng Văn Hải', khoi:'Khối sản xuất', phongBan:'Tổ bánh lạnh - sinh nhật', viTri:'Thợ bánh lạnh', trangThai:'Đã tuyển', cvUrl:'' }
   ];
 
+  const APPLICANTS_CACHE_KEY = 'tcl_applicants_cache_v1';
+  function saveApplicantsCache(){
+    try { localStorage.setItem(APPLICANTS_CACHE_KEY, JSON.stringify({ t: Date.now(), data: ALL_APPLICANTS })); } catch (e){}
+  }
+  function clearApplicantsCache(){ try { localStorage.removeItem(APPLICANTS_CACHE_KEY); } catch (e){} }
+
   async function loadApplicants(){
     const banner = document.getElementById('dashBanner');
     banner.classList.remove('show');
@@ -1366,13 +1373,31 @@
       return;
     }
 
+    // Hiện NGAY dữ liệu lần trước (nếu có) trong lúc tải bản mới nhất từ Google Sheet
+    let usedCache = false;
+    try {
+      const cached = JSON.parse(localStorage.getItem(APPLICANTS_CACHE_KEY) || 'null');
+      if (cached && Array.isArray(cached.data) && cached.data.length){
+        ALL_APPLICANTS = cached.data; renderAll(); usedCache = true;
+        banner.textContent = 'Đang cập nhật dữ liệu mới nhất từ Google Sheet…';
+        banner.classList.add('show');
+      }
+    } catch (e){}
+
     try {
       const res = await fetch(APPS_SCRIPT_URL + '?action=applicants');
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Unknown error');
       ALL_APPLICANTS = json.data || [];
+      saveApplicantsCache();
+      banner.classList.remove('show');
       renderAll();
     } catch (err){
+      if (usedCache){
+        banner.textContent = 'Không cập nhật được dữ liệu mới (' + err.message + ') — đang hiển thị dữ liệu lần tải trước.';
+        banner.classList.add('show');
+        return;
+      }
       banner.textContent = 'Không tải được dữ liệu trực tiếp (' + err.message + ') — đang hiển thị dữ liệu mẫu.';
       banner.classList.add('show');
       ALL_APPLICANTS = FALLBACK_APPLICANTS;
@@ -2065,6 +2090,7 @@
 
       populateDetailView(a);
       exitEditMode();
+      saveApplicantsCache();
       applyFiltersAndRender(); // cập nhật lại bảng + 5 thẻ tổng hợp từ dữ liệu vừa sửa, không cần gọi mạng lại
       showToast('Đã lưu thay đổi.');
     } catch (err){
