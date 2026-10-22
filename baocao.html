@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
     --orange:#F37021;
@@ -829,6 +830,38 @@
   @media (max-width:640px){
     .summary-row{grid-template-columns:1fr;}
   }
+
+  /* ============ BÁO CÁO TUYỂN DỤNG (màn "📊 Báo cáo") ============ */
+  .report-btn{border:1.5px solid var(--orange);background:var(--orange-tint);color:var(--orange-dark);font-weight:700;font-size:13px;padding:9px 16px;border-radius:999px;cursor:pointer;margin-left:auto;margin-right:8px}
+  .report-btn:hover{background:var(--orange);color:var(--white)}
+  .rp-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .rp-head h2{margin:0;font-size:20px;font-weight:800}
+  .rp-controls{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .rp-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .rp-chip{border:1px solid var(--line);background:var(--white);padding:7px 13px;border-radius:999px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .rp-chip.on{background:var(--orange);border-color:var(--orange);color:var(--white);font-weight:600}
+  .rp-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-soft)}
+  .rp-row input[type=date],.rp-row select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--white);color:var(--ink)}
+  .rp-period{font-family:'Be Vietnam Pro',sans-serif;font-weight:700;color:var(--blue);font-size:15px}
+  .rp-note{font-size:12px;color:var(--ink-soft)}
+  .rp-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+  .rp-kpi{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .rp-kpi .l{font-size:12px;color:var(--ink-soft)}
+  .rp-kpi .n{font-family:'Be Vietnam Pro',sans-serif;font-size:26px;font-weight:800;color:var(--blue);line-height:1.2}
+  .rp-kpi .d{font-size:12px}
+  .rp-up{color:var(--green)} .rp-down{color:var(--red)}
+  .rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .rp-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;overflow-x:auto}
+  .rp-card h3{margin:0 0 10px;font-size:13px;color:var(--blue);text-transform:uppercase;letter-spacing:.04em}
+  .rp-card.full{grid-column:1/-1}
+  .rp-table{border-collapse:collapse;width:100%;font-size:13px}
+  .rp-table th,.rp-table td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  .rp-table th:first-child,.rp-table td:first-child{text-align:left}
+  .rp-table th{color:var(--ink-soft);font-weight:600;font-size:12px;background:var(--cream)}
+  .rp-table tr.grp td{background:var(--orange-tint);color:var(--blue);font-weight:700}
+  .rp-table tr.rate td{color:var(--ink-soft);font-style:italic}
+  .rp-chart{position:relative;height:300px}
+  @media (max-width:980px){.rp-grid{grid-template-columns:1fr}.rp-kpis{grid-template-columns:repeat(2,1fr)}}
 </style>
 <style id="offerPaperCss">
   .ol-paper{width:210mm;max-width:none;margin:0 auto;background:#fff;color:#000;box-sizing:border-box;
@@ -882,6 +915,7 @@
     <div class="sticky-head">
       <div class="dash-topbar">
         <span class="logo-pill">The Cake Lab</span>
+        <button class="report-btn" id="reportBtn">📊 Báo cáo</button>
         <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
       </div>
 
@@ -1191,6 +1225,35 @@
     </div>
   </div>
 
+  <!-- ============ MÀN BÁO CÁO TUYỂN DỤNG ============ -->
+  <div class="detail-page" id="viewReport">
+    <div class="rp-head">
+      <button class="back-btn-detail" id="reportBackBtn">← Danh sách ứng viên</button>
+      <h2>📊 Báo cáo tuyển dụng</h2>
+    </div>
+    <div class="rp-controls">
+      <div class="rp-chips" id="rpChips"></div>
+      <div class="rp-row">
+        <span>Nộp CV từ</span><input type="date" id="rpFrom"><span>đến</span><input type="date" id="rpTo">
+        <span style="margin-left:12px">So sánh với</span>
+        <select id="rpCompare">
+          <option value="">Không so sánh</option>
+          <option value="truoc">Kỳ trước / cùng kỳ tháng trước</option>
+          <option value="nam">Cùng kỳ năm trước</option>
+        </select>
+      </div>
+      <div><span class="rp-period" id="rpPeriod"></span></div>
+      <div class="rp-note">Tính theo ngày nộp hồ sơ: ứng viên nộp trong kỳ hiện đang ở bước nào. Số liệu kỳ gần đây sẽ còn thay đổi khi cập nhật kết quả.</div>
+    </div>
+    <div class="rp-kpis" id="rpKpis"></div>
+    <div class="rp-grid">
+      <div class="rp-card"><h3>Bảng tổng hợp</h3><div id="rpTable"></div></div>
+      <div class="rp-card"><h3>Biểu đồ so sánh</h3><div class="rp-chart"><canvas id="rpChartBar"></canvas></div></div>
+      <div class="rp-card"><h3>Phễu tuyển dụng</h3><div class="rp-chart" style="height:260px"><canvas id="rpChartFunnel"></canvas></div></div>
+      <div class="rp-card"><h3>Theo vị trí</h3><div id="rpByPos"></div></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Gửi tin nhắn -->
@@ -1408,6 +1471,7 @@
   function renderAll(){
     populateFilterOptions();
     applyFiltersAndRender();
+    renderReport();
   }
 
   function uniqueSorted(list){
@@ -2932,6 +2996,198 @@
       document.getElementById('emailModal').classList.add('open');
     } catch (err){ showToast('Lỗi: ' + err.message); }
   });
+
+  // ============================================================
+  // BÁO CÁO TUYỂN DỤNG (màn "📊 Báo cáo")
+  // Tính theo NGÀY NỘP HỒ SƠ: ứng viên nộp trong kỳ → hiện đang ở bước nào.
+  // Mở thẳng bằng link: baocao.html?view=baocao&tu=2026-10-01&den=2026-10-22[&stu=..&sden=..]
+  // hoặc ?view=baocao&ky=thangnay&ss=truoc|nam (link do Tiểu Vịt TD gửi qua Zalo).
+  // ============================================================
+  const RP_METRICS = [
+    ['moi','Ứng viên mới'],['passCV','Pass CV'],['loaiCV','Loại CV'],['dongYPV','Đồng ý PV'],['tuChoiPV','Từ chối PV'],
+    ['passPV','Pass PV'],['loaiPV','Loại PV'],['daTuyen','Đã tuyển'],['tuChoiOffer','Từ chối Offer']
+  ];
+  const RP_PRESETS = [['homnay','Hôm nay'],['homqua','Hôm qua'],['7ngay','7 ngày'],['tuannay','Tuần này'],['tuantruoc','Tuần trước'],
+    ['thangnay','Tháng này'],['thangtruoc','Tháng trước'],['namnay','Năm nay']];
+  const RP = { preset: 'thangnay', from: null, to: null, cmp: '', cmpFrom: null, cmpTo: null, charts: {} };
+
+  const rpNorm = s => String(s || '').replace(/[đĐ]/g, 'd').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const rpDay = (y, m, d) => new Date(y, m, d);
+  const rpAdd = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const rpIso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const rpParse = s => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? rpDay(+m[1], +m[2] - 1, +m[3]) : null; };
+  const rpFmt = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+
+  /** Kỳ chọn sẵn → [từ, đến] (đến = ngày cuối, tính cả ngày đó) */
+  function rpPresetRange(p){
+    const t = new Date(), d0 = rpDay(t.getFullYear(), t.getMonth(), t.getDate());
+    const mon = rpAdd(d0, -((d0.getDay() + 6) % 7));
+    switch (p){
+      case 'homnay': return [d0, d0];
+      case 'homqua': return [rpAdd(d0, -1), rpAdd(d0, -1)];
+      case '7ngay': return [rpAdd(d0, -6), d0];
+      case 'tuannay': return [mon, d0];
+      case 'tuantruoc': return [rpAdd(mon, -7), rpAdd(mon, -1)];
+      case 'thangtruoc': return [rpDay(d0.getFullYear(), d0.getMonth() - 1, 1), rpDay(d0.getFullYear(), d0.getMonth(), 0)];
+      case 'namnay': return [rpDay(d0.getFullYear(), 0, 1), d0];
+      default: return [rpDay(d0.getFullYear(), d0.getMonth(), 1), d0]; // thangnay
+    }
+  }
+
+  /** Kỳ so sánh: tháng → cùng kỳ tháng trước; tuần → cùng kỳ tuần trước; khác → khoảng liền trước cùng độ dài; năm → lùi 1 năm */
+  function rpCompareRange(from, to, mode){
+    if (!mode) return null;
+    if (mode === 'nam') return [rpDay(from.getFullYear() - 1, from.getMonth(), from.getDate()), rpDay(to.getFullYear() - 1, to.getMonth(), to.getDate())];
+    const lastOfMonth = rpDay(to.getFullYear(), to.getMonth() + 1, 0).getDate();
+    if (from.getDate() === 1 && from.getMonth() === to.getMonth() && from.getFullYear() === to.getFullYear()){
+      const a = rpDay(from.getFullYear(), from.getMonth() - 1, 1);
+      const endPrev = rpDay(a.getFullYear(), a.getMonth() + 1, 0);
+      const b = to.getDate() === lastOfMonth ? endPrev : rpDay(a.getFullYear(), a.getMonth(), Math.min(to.getDate(), endPrev.getDate()));
+      return [a, b];
+    }
+    if (from.getDay() === 1 && (to - from) / 864e5 < 7) return [rpAdd(from, -7), rpAdd(to, -7)];
+    const len = Math.round((to - from) / 864e5) + 1;
+    return [rpAdd(from, -len), rpAdd(from, -1)];
+  }
+
+  /** Xếp 1 ứng viên vào các chỉ tiêu (dựa trên Trạng thái + các cột Kết quả) */
+  function rpClassify(a){
+    const tt = rpNorm(a.trangThai), kqCV = rpNorm(a.ketQuaCV), kqPV = rpNorm(a.ketQuaPV), kqOf = rpNorm(a.ketQuaOffer);
+    const coPV = !!String(a.ngayPV || '').trim();
+    const loaiCV = tt === 'cvloai' || kqCV === 'cvloai';
+    const passCV = !loaiCV && (kqCV === 'cvpass' || ['cvpass','tuchoipv','pvloai','pvpass','datuyen','tuchoioffer'].includes(tt) || coPV || !!kqPV);
+    const tuChoiPV = tt === 'tuchoipv' || kqPV === 'tuchoipv';
+    const passPV = ['pvpass','datuyen','tuchoioffer'].includes(tt) || kqPV === 'pvpass' || !!kqOf;
+    const loaiPV = tt === 'pvloai' || kqPV === 'pvloai';
+    const dongYPV = passCV && !tuChoiPV && (coPV || passPV || loaiPV || kqPV === 'dangchoketqua');
+    return {
+      moi: 1, passCV: +passCV, loaiCV: +loaiCV, dongYPV: +dongYPV, tuChoiPV: +tuChoiPV, passPV: +passPV, loaiPV: +loaiPV,
+      daTuyen: +(tt === 'datuyen' || kqOf === 'datuyen'), tuChoiOffer: +(tt === 'tuchoioffer' || kqOf === 'tuchoioffer'),
+      choCV: +(!loaiCV && !passCV)
+    };
+  }
+
+  function rpStats(from, to){
+    const f = rpIso(from), t = rpIso(to);
+    const empty = () => { const o = { choCV: 0 }; RP_METRICS.forEach(m => o[m[0]] = 0); return o; };
+    const total = empty(), byPos = {};
+    ALL_APPLICANTS.forEach(a => {
+      const d = String(a.thoiGianGui || '').slice(0, 10);
+      if (!d || d < f || d > t || !String(a.hoTen || '').trim()) return;
+      const c = rpClassify(a);
+      const pos = String(a.viTri || '(không ghi)').trim();
+      if (!byPos[pos]) byPos[pos] = empty();
+      Object.keys(c).forEach(k => { total[k] += c[k]; byPos[pos][k] += c[k]; });
+    });
+    return { total, byPos: Object.keys(byPos).map(k => Object.assign({ ten: k }, byPos[k])).sort((x, y) => y.moi - x.moi) };
+  }
+
+  function rpLabel(from, to){ return rpIso(from) === rpIso(to) ? rpFmt(from) : rpFmt(from) + ' – ' + rpFmt(to); }
+
+  function renderReport(){
+    if (!document.getElementById('viewReport').classList.contains('show')) return;
+    let from = RP.from, to = RP.to;
+    if (RP.preset){ [from, to] = rpPresetRange(RP.preset); }
+    if (!from || !to) return;
+    if (from > to) [from, to] = [to, from];
+    document.getElementById('rpFrom').value = rpIso(from);
+    document.getElementById('rpTo').value = rpIso(to);
+    document.querySelectorAll('#rpChips .rp-chip').forEach(c => c.classList.toggle('on', c.dataset.p === RP.preset));
+    document.getElementById('rpCompare').value = RP.cmp;
+
+    const cr = RP.cmpFrom && RP.cmpTo ? [RP.cmpFrom, RP.cmpTo] : rpCompareRange(from, to, RP.cmp);
+    const A = rpStats(from, to), B = cr ? rpStats(cr[0], cr[1]) : null;
+    const la = rpLabel(from, to), lb = cr ? rpLabel(cr[0], cr[1]) : '';
+    document.getElementById('rpPeriod').textContent = '🗓️ ' + la + (B ? '   ·   so với ' + lb : '');
+
+    const a = A.total, b = B ? B.total : null;
+    const pct = (x, y) => (x + y) ? Math.round(x / (x + y) * 100) + '%' : '—';
+    const diff = (x, y) => { const d = x - y; return d ? '<span class="' + (d > 0 ? 'rp-up' : 'rp-down') + '">' + (d > 0 ? '▲ +' : '▼ ') + d + '</span>' : '<span>=</span>'; };
+
+    // Thẻ số liệu nhanh
+    const kpi = (l, k, sub) => '<div class="rp-kpi"><div class="l">' + l + '</div><div class="n">' + a[k] + '</div><div class="d">' +
+      (b ? diff(a[k], b[k]) + ' <span class="rp-note">(' + b[k] + ')</span>' : (sub || '&nbsp;')) + '</div></div>';
+    document.getElementById('rpKpis').innerHTML =
+      kpi('Ứng viên mới', 'moi', a.choCV ? '⏳ ' + a.choCV + ' chưa xử lý CV' : '') + kpi('Pass CV', 'passCV', 'tỉ lệ ' + pct(a.passCV, a.loaiCV)) +
+      kpi('Đồng ý PV', 'dongYPV', 'tỉ lệ ' + pct(a.dongYPV, a.tuChoiPV)) + kpi('Pass PV', 'passPV', 'tỉ lệ ' + pct(a.passPV, a.loaiPV)) +
+      kpi('Đã tuyển', 'daTuyen', 'nhận offer ' + pct(a.daTuyen, a.tuChoiOffer));
+
+    // Bảng tổng hợp
+    const cols = b ? 4 : 2;
+    const grp = t => '<tr class="grp"><td colspan="' + cols + '">' + t + '</td></tr>';
+    const row = (l, k) => '<tr><td>' + l + '</td><td><b>' + a[k] + '</b></td>' + (b ? '<td>' + b[k] + '</td><td>' + diff(a[k], b[k]) + '</td>' : '') + '</tr>';
+    const rate = (l, x, y) => '<tr class="rate"><td>' + l + '</td><td>' + pct(a[x], a[y]) + '</td>' + (b ? '<td>' + pct(b[x], b[y]) + '</td><td></td>' : '') + '</tr>';
+    document.getElementById('rpTable').innerHTML = '<table class="rp-table"><tr><th>Chỉ tiêu</th><th>Kỳ này</th>' + (b ? '<th>Kỳ so sánh</th><th>Chênh lệch</th>' : '') + '</tr>' +
+      grp('Hồ sơ') + row('Ứng viên mới', 'moi') + row('Chưa xử lý CV', 'choCV') +
+      grp('Vòng CV') + row('Pass CV', 'passCV') + row('Loại CV', 'loaiCV') + rate('Tỉ lệ pass CV', 'passCV', 'loaiCV') +
+      grp('Mời phỏng vấn') + row('Đồng ý PV', 'dongYPV') + row('Từ chối PV', 'tuChoiPV') + rate('Tỉ lệ đồng ý PV', 'dongYPV', 'tuChoiPV') +
+      grp('Vòng phỏng vấn') + row('Pass PV', 'passPV') + row('Loại PV', 'loaiPV') + rate('Tỉ lệ pass PV', 'passPV', 'loaiPV') +
+      grp('Offer') + row('Đã tuyển', 'daTuyen') + row('Từ chối Offer', 'tuChoiOffer') + rate('Tỉ lệ nhận offer', 'daTuyen', 'tuChoiOffer') + '</table>';
+
+    // Theo vị trí
+    document.getElementById('rpByPos').innerHTML = A.byPos.length
+      ? '<table class="rp-table"><tr><th>Vị trí</th><th>Mới</th><th>Pass CV</th><th>Đồng ý PV</th><th>Pass PV</th><th>Đã tuyển</th></tr>' +
+        A.byPos.map(p => '<tr><td>' + escapeHtml(p.ten) + '</td><td>' + p.moi + '</td><td>' + p.passCV + '</td><td>' + p.dongYPV + '</td><td>' + p.passPV + '</td><td><b>' + p.daTuyen + '</b></td></tr>').join('') + '</table>'
+      : '<div class="rp-note">Không có ứng viên nộp hồ sơ trong kỳ này.</div>';
+
+    // Biểu đồ
+    if (typeof Chart === 'undefined'){ setTimeout(renderReport, 400); return; }
+    Object.values(RP.charts).forEach(c => c.destroy());
+    RP.charts.bar = new Chart(document.getElementById('rpChartBar'), {
+      type: 'bar',
+      data: { labels: RP_METRICS.map(m => m[1]), datasets: [{ label: la, data: RP_METRICS.map(m => a[m[0]]), backgroundColor: '#F37021', borderRadius: 4 }]
+        .concat(b ? [{ label: lb, data: RP_METRICS.map(m => b[m[0]]), backgroundColor: '#032C7D', borderRadius: 4 }] : []) },
+      options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    const funnel = [['Ứng viên mới','moi'],['Pass CV','passCV'],['Đồng ý PV','dongYPV'],['Pass PV','passPV'],['Đã tuyển','daTuyen']];
+    RP.charts.funnel = new Chart(document.getElementById('rpChartFunnel'), {
+      type: 'bar',
+      data: { labels: funnel.map(f => f[0]), datasets: [{ label: la, data: funnel.map(f => a[f[1]]), backgroundColor: ['#F37021','#F58A47','#F7A46D','#5B7BB5','#032C7D'], borderRadius: 4 }]
+        .concat(b ? [{ label: lb, data: funnel.map(f => b[f[1]]), backgroundColor: 'rgba(3,44,125,0.25)', borderRadius: 4 }] : []) },
+      options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: !!b, position: 'bottom' } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+  }
+
+  function showReportView(){
+    document.getElementById('viewList').style.display = 'none';
+    document.getElementById('viewDetail').classList.remove('show');
+    document.getElementById('viewReport').classList.add('show');
+    renderReport();
+  }
+  function hideReportView(){
+    document.getElementById('viewReport').classList.remove('show');
+    document.getElementById('viewList').style.display = '';
+  }
+
+  (function initReport(){
+    document.getElementById('rpChips').innerHTML = RP_PRESETS.map(p => '<button type="button" class="rp-chip" data-p="' + p[0] + '">' + p[1] + '</button>').join('');
+    document.querySelectorAll('#rpChips .rp-chip').forEach(c => c.addEventListener('click', () => {
+      RP.preset = c.dataset.p; RP.from = RP.to = RP.cmpFrom = RP.cmpTo = null; renderReport();
+    }));
+    const onDate = () => {
+      const f = rpParse(document.getElementById('rpFrom').value), t = rpParse(document.getElementById('rpTo').value);
+      if (!f || !t) return;
+      RP.preset = ''; RP.from = f; RP.to = t; RP.cmpFrom = RP.cmpTo = null; renderReport();
+    };
+    document.getElementById('rpFrom').addEventListener('change', onDate);
+    document.getElementById('rpTo').addEventListener('change', onDate);
+    document.getElementById('rpCompare').addEventListener('change', e => { RP.cmp = e.target.value; RP.cmpFrom = RP.cmpTo = null; renderReport(); });
+    document.getElementById('reportBtn').addEventListener('click', showReportView);
+    document.getElementById('reportBackBtn').addEventListener('click', hideReportView);
+
+    // Link mở thẳng báo cáo (từ Zalo Tiểu Vịt TD)
+    const q = new URLSearchParams(location.search);
+    if (q.get('view') === 'baocao'){
+      if (q.get('tu') && q.get('den')){ RP.preset = ''; RP.from = rpParse(q.get('tu')); RP.to = rpParse(q.get('den')); }
+      else if (q.get('ky')) RP.preset = q.get('ky');
+      RP.cmp = q.get('ss') || '';
+      if (q.get('stu') && q.get('sden')){ RP.cmpFrom = rpParse(q.get('stu')); RP.cmpTo = rpParse(q.get('sden')); if (!RP.cmp) RP.cmp = 'truoc'; }
+      document.getElementById('viewList').style.display = 'none';
+      document.getElementById('viewReport').classList.add('show');
+      if (ALL_APPLICANTS.length) renderReport();
+    }
+  })();
+
 </script>
 
 </body>
